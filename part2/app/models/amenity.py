@@ -1,7 +1,7 @@
 from . import BaseModel
 
 class Amenity(BaseModel):
-    def __init__(self, name):
+    def __init__(self, name=str):
         super().__init__()
         if len(name) <= 50:
             self.name = name

@@ -1,7 +1,7 @@
 from . import BaseModel
 
 class User(BaseModel):
-    def __init__(self, first_name, last_name, email, is_admin):
+    def __init__(self, first_name=str, last_name=str, email=str, is_admin=False):
         super().__init__()
         if len(first_name) <= 50:
             self.first_name = first_name
@@ -12,9 +12,12 @@ class User(BaseModel):
             self.last_name = last_name
         else:
             return "Name is too long"
-
+        self.is_admin = is_admin
         self.email = email
-        self.__is_admin = bool(is_admin)
+        self.places = []
 
+    def add_places(self, place):
+        self.places.append(place)
+    
     def __del__(self):
         return "User deleted"
