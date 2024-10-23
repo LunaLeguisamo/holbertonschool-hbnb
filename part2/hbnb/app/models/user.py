@@ -1,21 +1,20 @@
 from . import BaseModel
 
-class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner):
+class User(BaseModel):
+    def __init__(self, first_name, last_name, email, is_admin):
         super().__init__()
-        self.title = title
-        self.description = description
-        self.price = price
-        self.latitude = latitude
-        self.longitude = longitude
-        self.owner = owner
-        self.reviews = []  # List to store related reviews
-        self.amenities = []  # List to store related amenities
+        if len(first_name) <= 50:
+            self.first_name = first_name
+        else:
+            return "Name is too long"
+        
+        if len(last_name) <= 50:
+            self.last_name = last_name
+        else:
+            return "Name is too long"
 
-    def add_review(self, review):
-        """Add a review to the place."""
-        self.reviews.append(review)
+        self.email = email
+        self.__is_admin = bool(is_admin)
 
-    def add_amenity(self, amenity):
-        """Add an amenity to the place."""
-        self.amenities.append(amenity)
+    def __del__(self):
+        return "User deleted"

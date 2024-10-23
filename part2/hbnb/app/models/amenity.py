@@ -8,9 +8,6 @@ class Amenity(BaseModel):
         else:
             return "Name is too long"
   
-    def delete_amenity(self):
+    def __del__(self):
         #eliminar amenity
-        
-        
-    def list_amenities(self):
-        #listar ameninties
+        return "Amenity deleted"

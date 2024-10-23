@@ -1,21 +1,16 @@
 from . import BaseModel
 
-class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude, owner):
+class Review(BaseModel):
+    def __init__(self, text, rating, place, user):
         super().__init__()
-        self.title = title
-        self.description = description
-        self.price = price
-        self.latitude = latitude
-        self.longitude = longitude
-        self.owner = owner
-        self.reviews = []  # List to store related reviews
-        self.amenities = []  # List to store related amenities
+        self.text = text
+        if rating >= 0 and rating <= 5:
+            self.rating = rating
+        else:
+            return "Error"
+        self.place = place
+        self.user = user    
 
-    def add_review(self, review):
-        """Add a review to the place."""
-        self.reviews.append(review)
-
-    def add_amenity(self, amenity):
-        """Add an amenity to the place."""
-        self.amenities.append(amenity)
+    def __del__(self):
+        #elmininar review
+        return "Review deleted"
