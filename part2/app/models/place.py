@@ -1,7 +1,7 @@
 from . import BaseModel
-from . import User
+from app.models.user import User
 class Place(BaseModel):
-    def __init__(self, title=str, description=str, price=float, latitude=float, longitude=float, ownerUser):
+    def __init__(self, title:str, description:str, price:float, latitude:float, longitude:float, owner: User):
         super().__init__()
         if len(title) <= 100:
             self.title = title
@@ -12,15 +12,15 @@ class Place(BaseModel):
         if latitude >= -90 and latitude <= 90:
             self.latitude = latitude
         else:
-            return "Latitude is out of range"
+            raise ValueError("Latitude is out of range")
         if longitude >= -180 and longitude <= 180:
             self.longitude = longitude
         else:
-            return "Longitude is out of range"
-        if owner:
+            raise ValueError("Longitude is out of range")
+        if isinstance(owner, User):
             self.owner = owner
         else:
-            return "Owner does not exist"
+            raise ValueError("Owner does not exist")
         self.reviews = []  # List to store related reviews
         self.amenities = []  # List to store related amenities
 
@@ -35,4 +35,3 @@ class Place(BaseModel):
     def __del__(self):
         #eliminar place
         return "Place deleted"
-
