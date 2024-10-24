@@ -1,7 +1,7 @@
 from . import BaseModel
-
+from . import User
 class Place(BaseModel):
-    def __init__(self, title=str, description=str, price=float, latitude=float, longitude=float, owner=str):
+    def __init__(self, title=str, description=str, price=float, latitude=float, longitude=float, ownerUser):
         super().__init__()
         if len(title) <= 100:
             self.title = title
