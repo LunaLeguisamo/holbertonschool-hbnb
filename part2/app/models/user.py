@@ -2,7 +2,7 @@ from . import BaseModel
 import re
 
 class User(BaseModel):
-    def __init__(self, first_name=str, last_name=str, email=str, is_admin=False):
+    def __init__(self, first_name:str, last_name:str, email:str, is_admin=False):
         super().__init__()
         if len(first_name) <= 50:
             self.first_name = first_name
@@ -14,14 +14,17 @@ class User(BaseModel):
         else:
             return "Name is too long"
         self.is_admin = is_admin
-        self.email = email
+        if self.validar_email(email):
+            self.email = email
+        else:
+            return None
         self.places = []
 
-    def validar_email(email):
+    def validar_email(self, email):
         # Expresión regular para validar el formato del correo electrónico
-        regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        val = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         # Comprobar si el email coincide con el patrón
-        if re.match(regex, email):
+        if re.match(val, email):
             return True
         else:
             return False
