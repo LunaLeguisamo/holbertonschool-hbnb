@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields, marshal
 from app.services import facade
+from cerberus import Validator
 
 api = Namespace('users', description='User operations')
 
@@ -27,7 +28,6 @@ class UserList(Resource):
         
         try:
             new_user = facade.create_user(user_data)
-            print(new_user.first_name)
             
         except ValueError as e:
             return {"error": str(e)}, 400
@@ -54,11 +54,21 @@ class UserResource(Resource):
         if not user:
             return {'error': 'User not found'}, 404
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
+    
     def put(self, user_id):
+        scheme = {
+            'first_name': {'type': 'string'},
+            'last_name': {'type': 'string'},
+            'email': {'type': 'string', 'regex': r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'}
+        }
+        
+        val = Validator(scheme)
         user_data = api.payload
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
-        else:
+        elif val.validate(user_data):
             facade.update_user(user_id, user_data)
-        return "User updated", 200
+            return "User updated", 200
+        else:
+            return "Invalidate data", 400
