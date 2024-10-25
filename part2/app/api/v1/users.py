@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields, marshal
-from app.services.facade import HBnBFacade
+from app.services import facade
 
 api = Namespace('users', description='User operations')
 
@@ -10,7 +10,7 @@ user_model = api.model('User', {
     'email': fields.String(required=True, description='Email of the user')
 })
 
-facade = HBnBFacade()
+# facade = HBnBFacade()
 
 @api.route('/')
 class UserList(Resource):
@@ -20,17 +20,23 @@ class UserList(Resource):
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new user"""
-        user_data = api.payload
-
-        # Simulate email uniqueness check (to be replaced by real validation with persistence)
-        if user_data['email'] == None:
-            return {'error': 'Invalid email'}, 400
-        else:
-            existing_user = facade.get_user_by_email(user_data['email'])
-            if existing_user:
-                return {'error': 'Email already registered'}, 400
+        user_data = api.payload  
+        existing_user = facade.get_user_by_email(user_data['email'])
+        if existing_user:
+            return {'error': 'Email already registered'}, 400
+        
+        try:
+            new_user = facade.create_user(user_data)
+            print(new_user.first_name)
             
-        new_user = facade.create_user(user_data)
+        except ValueError as e:
+            return {"error": str(e)}, 400
+        # Simulate email uniqueness check (to be replaced by real validation with persistence)
+        # if user_data['email'] == None:
+        #     return {'error': 'Invalid email'}, 400
+        # else:
+            
+        # new_user = facade.create_user(user_data)
         return {'id': new_user.id, 'first_name': new_user.first_name, 'last_name': new_user.last_name, 'email': new_user.email}, 201
     
     def get(self):

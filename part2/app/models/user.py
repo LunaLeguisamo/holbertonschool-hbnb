@@ -17,7 +17,7 @@ class User(BaseModel):
         if self.validar_email(email):
             self.email = email
         else:
-            return None
+            raise ValueError("Invalid Email")
         self.places = []
 
     def validar_email(self, email):
