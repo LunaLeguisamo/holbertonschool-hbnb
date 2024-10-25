@@ -1,4 +1,4 @@
-from flask_restx import Namespace, Resource, fields
+from flask_restx import Namespace, Resource, fields, marshal
 from app.services.facade import HBnBFacade
 
 api = Namespace('users', description='User operations')
@@ -23,7 +23,7 @@ class UserList(Resource):
         user_data = api.payload
 
         # Simulate email uniqueness check (to be replaced by real validation with persistence)
-        if not user_data['email'] == None:
+        if user_data['email'] == None:
             return {'error': 'Invalid email'}, 400
         else:
             existing_user = facade.get_user_by_email(user_data['email'])
@@ -32,7 +32,9 @@ class UserList(Resource):
             
             new_user = facade.create_user(user_data)
             return {'id': new_user.id, 'first_name': new_user.first_name, 'last_name': new_user.last_name, 'email': new_user.email}, 201
-        
+    def get(self):
+        list_users = facade.list_users()
+        return marshal(list_users, user_model), 201
 
 @api.route('/<user_id>')
 class UserResource(Resource):

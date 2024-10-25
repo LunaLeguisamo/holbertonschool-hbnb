@@ -24,3 +24,7 @@ class HBnBFacade:
     def get_place(self, place_id):
         # Logic will be implemented in later tasks
         pass
+    
+    def list_users(self):
+        list = self.user_repo.get_all()
+        return list
