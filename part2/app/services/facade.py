@@ -28,3 +28,8 @@ class HBnBFacade:
     def list_users(self):
         list = self.user_repo.get_all()
         return list
+    
+    def update_user(self, user_id, user_data):
+        update = self.user_repo.update(user_id, user_data)
+        return update
+    
