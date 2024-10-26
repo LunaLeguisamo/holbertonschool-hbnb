@@ -11,8 +11,6 @@ user_model = api.model('User', {
     'email': fields.String(required=True, description='Email of the user')
 })
 
-# facade = HBnBFacade()
-
 @api.route('/')
 class UserList(Resource):
     @api.expect(user_model, validate=True)
@@ -25,20 +23,14 @@ class UserList(Resource):
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             return {'error': 'Email already registered'}, 400
-        
         try:
             new_user = facade.create_user(user_data)
-            
         except ValueError as e:
             return {"error": str(e)}, 400
-        # Simulate email uniqueness check (to be replaced by real validation with persistence)
-        # if user_data['email'] == None:
-        #     return {'error': 'Invalid email'}, 400
-        # else:
-            
-        # new_user = facade.create_user(user_data)
+        
         return {'id': new_user.id, 'first_name': new_user.first_name, 'last_name': new_user.last_name, 'email': new_user.email}, 201
     
+    @api.response(200, 'List of users retrieved successfully')
     def get(self):
         list_users = facade.list_users()
         return marshal(list_users, user_model), 200
@@ -55,6 +47,10 @@ class UserResource(Resource):
             return {'error': 'User not found'}, 404
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
     
+    @api.expect(user_model)
+    @api.response(200, 'User updated successfully')
+    @api.response(404, 'User not found')
+    @api.response(400, 'Invalid input data')
     def put(self, user_id):
         scheme = {
             'first_name': {'type': 'string'},
