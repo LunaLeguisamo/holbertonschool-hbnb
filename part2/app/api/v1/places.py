@@ -1,8 +1,7 @@
 from flask_restx import Namespace, Resource, fields, marshal
 from app.services import facade
 from cerberus import Validator
-from app.models.user import User
-from app.models.amenity import Amenity
+from app.models.place import Place
 
 api = Namespace('places', description='Place operations')
 
@@ -19,6 +18,13 @@ user_model = api.model('PlaceUser', {
     'email': fields.String(description='Email of the owner')
 })
 
+review_model = api.model('PlaceReview', {
+    'id': fields.String(description='Review ID'),
+    'text': fields.String(description='Text of the review'),
+    'rating': fields.Integer(description='Rating of the place (1-5)'),
+    'user_id': fields.String(description='ID of the user')
+})
+
 # Define the place model for input validation and documentation
 place_model = api.model('Place', {
     'title': fields.String(required=True, description='Title of the place'),
@@ -27,8 +33,11 @@ place_model = api.model('Place', {
     'latitude': fields.Float(required=True, description='Latitude of the place'),
     'longitude': fields.Float(required=True, description='Longitude of the place'),
     'owner_id': fields.String(required=True, description='ID of the owner'),
-    'amenities': fields.List(fields.String, required=True, description="List of amenities ID's")
+    'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities'),
+    'reviews': fields.List(fields.Nested(review_model), description='List of reviews')
 })
+
+
 
 @api.route('/')
 class PlaceList(Resource):
@@ -44,14 +53,9 @@ class PlaceList(Resource):
         except ValueError as e:
             return {"error": str(e)}, 400
         
-        return {'id': new_place.id,
-                'title': new_place.title, 
-                'description': new_place.description,
-                'price': new_place.price,
-                'latitude': new_place.latitude,
-                'longitude': new_place.longitude,
-                'owner_id': new_place.owner_id,
-                'amenities': new_place.amenities}, 201
+        return {'id': new_place.id, 'title': new_place.title, 'description': new_place.description,
+                'price': new_place.price, 'latitude': new_place.latitude, 'longitude': new_place.longitude,
+                'owner_id': new_place.owner_id, 'amenities': Place.add_amenity(new_place.amenities), 'reviews': Place.add_review(new_place.reviews)}, 201
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
@@ -68,7 +72,9 @@ class PlaceResource(Resource):
         place = facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
-        return {'id': place.id, 'title': place.title, 'latitude': place.latitude, 'longitude': place.longitude}, 200
+        return {'id': place.id, 'title': place.title, 'latitude': place.latitude, 'longitude': place.longitude,
+                'owner': {'id': place.owner_id.id, 'first_name': place.owner_id.first_name, 'last_name': place.owner_id.last_name, 'email': place.owner_id.email}, 
+                'amenities': {'id': place.amenities.id, 'name': place.amenities}}, 200
 
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
@@ -77,12 +83,12 @@ class PlaceResource(Resource):
     def put(self, place_id):
         """Update a place's information"""
         scheme = {
-            'name': {'type': 'string'},
-            'title': {'type:' 'string'}, 
+            'title': {'type': 'string'}, 
             'description': {'type': 'string'}, 
             'price': {'type': 'float'}, 
             'latitude': {'type': 'float'}, 
-            'longitude': {'type': 'float'}
+            'longitude': {'type': 'float'},
+            'owner_id': {'type': 'string'}
             }
         
         val = Validator(scheme)
