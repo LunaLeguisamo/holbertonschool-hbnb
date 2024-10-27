@@ -1,7 +1,7 @@
 from . import BaseModel
 from app.models.user import User
 class Place(BaseModel):
-    def __init__(self, title:str, description:str, price:float, latitude:float, longitude:float, owner: User):
+    def __init__(self, title:str, description:str, price:float, latitude:float, longitude:float, owner_id: User):
         super().__init__()
         if len(title) <= 100:
             self.title = title
@@ -17,10 +17,7 @@ class Place(BaseModel):
             self.longitude = longitude
         else:
             raise ValueError("Longitude is out of range")
-        if isinstance(owner, User):
-            self.owner = owner
-        else:
-            raise ValueError("Owner does not exist")
+        self.owner_id = owner_id
         self.reviews = []  # List to store related reviews
         self.amenities = []  # List to store related amenities
 

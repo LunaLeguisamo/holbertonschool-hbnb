@@ -44,14 +44,9 @@ class PlaceList(Resource):
         except ValueError as e:
             return {"error": str(e)}, 400
         
-        return {'id': new_place.id,
-                'title': new_place.title, 
-                'description': new_place.description,
-                'price': new_place.price,
-                'latitude': new_place.latitude,
-                'longitude': new_place.longitude,
-                'owner_id': new_place.owner_id,
-                'amenities': new_place.amenities}, 201
+        return {'id': new_place.id, 'title': new_place.title, 'description': new_place.description,
+                'price': new_place.price, 'latitude': new_place.latitude, 'longitude': new_place.longitude,
+                'owner_id': new_place.owner_id}, 201
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
@@ -77,12 +72,12 @@ class PlaceResource(Resource):
     def put(self, place_id):
         """Update a place's information"""
         scheme = {
-            'name': {'type': 'string'},
-            'title': {'type:' 'string'}, 
+            'title': {'type': 'string'}, 
             'description': {'type': 'string'}, 
             'price': {'type': 'float'}, 
             'latitude': {'type': 'float'}, 
-            'longitude': {'type': 'float'}
+            'longitude': {'type': 'float'},
+            'owner_id': {'type': 'string'}
             }
         
         val = Validator(scheme)
