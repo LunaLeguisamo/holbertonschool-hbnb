@@ -2,6 +2,8 @@ from . import BaseModel
 import re
 
 class User(BaseModel):
+    user_list = []
+    
     def __init__(self, first_name:str, last_name:str, email:str, is_admin=False):
         super().__init__()
         if len(first_name) <= 50:
@@ -19,6 +21,7 @@ class User(BaseModel):
         else:
             raise ValueError("Invalid Email")
         self.places = []
+        self.user_list.append(self) 
 
     def validar_email(self, email):
         # Expresión regular para validar el formato del correo electrónico
@@ -31,6 +34,17 @@ class User(BaseModel):
     
     def add_places(self, place):
         self.places.append(place)
+    
+    def get_user_list(self):
+        return User.user_list
+    
+    def dictionary(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email
+        }
     
     def __del__(self):
         return "User deleted"

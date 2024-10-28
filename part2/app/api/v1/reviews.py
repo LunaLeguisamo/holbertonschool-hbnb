@@ -47,7 +47,7 @@ class ReviewResource(Resource):
         if not review:
             return {'error': 'Review not found'}, 404
         
-        return {'id': review.id, 'text': review.text, 'rating': review.rating}
+        return {'id': review.id, 'text': review.text, 'rating': review.rating, 'user_id': review.user_id, 'place_id': review.place_id}
 
     @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
@@ -56,6 +56,7 @@ class ReviewResource(Resource):
     def put(self, review_id):
         """Update a review's information"""
         scheme = {
+            'id': {'type': 'string'},
             'text': {'type': 'string'}, 
             'rating': {'type': 'int'}, 
             'user_id': {'type': 'string'}, 
@@ -77,7 +78,12 @@ class ReviewResource(Resource):
     @api.response(404, 'Review not found')
     def delete(self, review_id):
         """Delete a review"""
-        facade.delete_review(review_id)
+        review = facade.get_review(review_id)
+        if review:
+            facade.delete_review(review_id)
+            return {"message": "Review deleted successfully"}, 200
+        else:
+            return {"error": "Review not found"}, 404
 
 @api.route('/places/<place_id>/reviews')
 class PlaceReviewList(Resource):

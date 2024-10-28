@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource, fields, marshal
 from app.services import facade
+from app.models.user import User
 from cerberus import Validator
-from app.models.place import Place
 
 api = Namespace('places', description='Place operations')
 
@@ -33,10 +33,10 @@ place_model = api.model('Place', {
     'latitude': fields.Float(required=True, description='Latitude of the place'),
     'longitude': fields.Float(required=True, description='Longitude of the place'),
     'owner_id': fields.String(required=True, description='ID of the owner'),
+    'owner': fields.Nested(user_model, description='Owner of the place'),
     'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities'),
     'reviews': fields.List(fields.Nested(review_model), description='List of reviews')
 })
-
 
 
 @api.route('/')
@@ -52,10 +52,10 @@ class PlaceList(Resource):
             new_place = facade.create_place(place_data)
         except ValueError as e:
             return {"error": str(e)}, 400
-        
+        print(place_data)
         return {'id': new_place.id, 'title': new_place.title, 'description': new_place.description,
                 'price': new_place.price, 'latitude': new_place.latitude, 'longitude': new_place.longitude,
-                'owner_id': new_place.owner_id, 'amenities': Place.add_amenity(new_place.amenities), 'reviews': Place.add_review(new_place.reviews)}, 201
+                'owner_id': new_place.owner.id}, 201
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
@@ -72,9 +72,16 @@ class PlaceResource(Resource):
         place = facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
-        return {'id': place.id, 'title': place.title, 'latitude': place.latitude, 'longitude': place.longitude,
-                'owner': {'id': place.owner_id.id, 'first_name': place.owner_id.first_name, 'last_name': place.owner_id.last_name, 'email': place.owner_id.email}, 
-                'amenities': {'id': place.amenities.id, 'name': place.amenities}}, 200
+        return {'id': place.id,
+                'title': place.title,
+                'latitude': place.latitude,
+                'longitude': place.longitude,
+                'owner': {'id': place.owner.id,
+                          'first_name': place.owner.first_name,
+                          'last_name': place.owner.last_name,
+                          'email': place.owner.email}, 
+                'amenities': [{'id': place.amenities.id ,
+                               'name': place.amenities.name} for amenity in place.amenities]}, 200
 
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
