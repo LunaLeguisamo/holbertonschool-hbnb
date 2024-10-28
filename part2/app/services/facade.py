@@ -32,6 +32,9 @@ class HBnBFacade:
         return update
     
     def create_amenity(self, amenity_data):
+        amenity_name = amenity_data.get('name')
+        new_amenity = Amenity(amenity_name)
+        self.amenity_repo.add(new_amenity)
         amenity = Amenity(**amenity_data)
         self.amenity_repo.add(amenity)
         return amenity
@@ -51,6 +54,7 @@ class HBnBFacade:
     def create_place(self, place_data):
         owner_id = place_data.pop('owner_id')
         user_list = User.get_user_list(self)
+        owner = None
         for user in user_list:
             if user.id == owner_id:
                 owner = user

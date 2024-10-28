@@ -52,7 +52,6 @@ class PlaceList(Resource):
             new_place = facade.create_place(place_data)
         except ValueError as e:
             return {"error": str(e)}, 400
-        print(place_data)
         return {'id': new_place.id, 'title': new_place.title, 'description': new_place.description,
                 'price': new_place.price, 'latitude': new_place.latitude, 'longitude': new_place.longitude,
                 'owner_id': new_place.owner.id}, 201
