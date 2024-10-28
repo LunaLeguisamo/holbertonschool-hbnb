@@ -9,6 +9,11 @@ amenity_model = api.model('Amenity', {
     'name': fields.String(required=True, description='Name of the amenity')
 })
 
+amenity_response_model = api.model(
+    'AmenityResponse',
+    amenity_model.clone('AmenityReponse', {"id": fields.String()})
+)
+
 @api.route('/')
 class AmenityList(Resource):
     @api.expect(amenity_model)
@@ -25,11 +30,11 @@ class AmenityList(Resource):
             return {"error": str(e)}, 400
         
 
-    @api.response(200, 'List of amenities retrieved successfully')
+    @api.response(200, 'List of amenities retrieved successfully', [amenity_response_model])
     def get(self):
         """Retrieve a list of all amenities"""
         list_amenities = facade.get_all_amenities()
-        return marshal(list_amenities, amenity_model), 200
+        return marshal(list_amenities, amenity_response_model), 200
 
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):

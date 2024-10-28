@@ -33,23 +33,57 @@ place_model = api.model('Place', {
     'latitude': fields.Float(required=True, description='Latitude of the place'),
     'longitude': fields.Float(required=True, description='Longitude of the place'),
     'owner_id': fields.String(required=True, description='ID of the owner'),
-    'owner': fields.Nested(user_model, description='Owner of the place'),
-    'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities'),
-    'reviews': fields.List(fields.Nested(review_model), description='List of reviews')
+    'amenities': fields.List(fields.String(description='List of amenities')),
 })
+
+
+place_response_model = api.model('PlaceResponse',
+    place_model.clone('PlaceResponse', {
+        'owner': fields.Nested(user_model, description='Owner of the place'),
+        'amenities': fields.List(fields.Nested(amenity_model), description='List of amenities'),
+        'reviews': fields.List(fields.Nested(review_model), description='List of reviews')
+    })
+)
 
 
 @api.route('/')
 class PlaceList(Resource):
     @api.expect(place_model)
-    @api.response(201, 'Place successfully created')
+    @api.response(201, 'Place successfully created', place_response_model)
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new place"""
         place_data = api.payload
+        owner_id = place_data.pop('owner_id')
+        owner = facade.get_user(owner_id)
+        if owner:
+            place_data['owner'] = owner
+        else:
+            return {'error': 'Owner not found'}, 404
+
+        list_amenities = []
+        amenity_id_list = place_data.get('amenities')# ["lakfj-efa-323-423", "sadsad-25h-45d3-d323"]
+        for amenity_id in amenity_id_list:
+            amenity = facade.get_amenity(amenity_id)
+            if not amenity:
+                return {'error': 'Not found'}
+            list_amenities.append(amenity)
+            
+        place_data['amenities'] = list_amenities
+        # "lakfj-efa-323-423" -> Amenity{"id": "lakfj-efa-323-423", "name": "WiFi"}
+        # "sadsad-25h-45d3-d323" -> Amenity{"id": "sadsad-25h-45d3-d323", "name": "Pool"}
+        
+        # amenity_list -> [Amenity{"id": "sadsad-25h-45d3-d323", "name": "Pool"}, Amenity{"id": "lakfj-efa-323-423", "name": "WiFi"}]
+
+        # amenity = facade.get_amenity(amenity_id)
 
         try:
             new_place = facade.create_place(place_data)
+            
+            # list_ameni = []
+            # for amen in new_place.amenities:
+            #     list_ameni.append({'id': amen.id, 'name': amen.name})
+            
             return {
                 'id': new_place.id,
                 'title': new_place.title,
@@ -57,13 +91,18 @@ class PlaceList(Resource):
                 'price': new_place.price,
                 'latitude': new_place.latitude,
                 'longitude': new_place.longitude,
-                'owner_id': new_place.owner.id
-                }, 201
+                'owner_id': new_place.owner.id,
+                'amenities': [
+                    {'id': amen.id, 'name': amen.name}
+                    for amen in new_place.amenities
+                ],
+                'reviews': []
+            }, 201
         except ValueError as e:
             return {"error": str(e)}, 400
         
 
-    @api.response(200, 'List of places retrieved successfully')
+    @api.response(200, 'List of places retrieved successfully', [place_response_model])
     def get(self):
         """Retrieve a list of all places"""
         list_places = facade.get_all_places()
