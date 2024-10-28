@@ -20,10 +20,10 @@ class AmenityList(Resource):
 
         try:
             new_amenity = facade.create_amenity(amenity_data)
+            return {'id': new_amenity.id, 'name': new_amenity.name}, 201
         except ValueError as e:
             return {"error": str(e)}, 400
         
-        return {'id': new_amenity.id, 'name': new_amenity.name}, 201
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
@@ -48,10 +48,7 @@ class AmenityResource(Resource):
     @api.response(400, 'Invalid input data')
     def put(self, amenity_id):
         """Update an amenity's information"""
-        scheme = {
-            'name': {'type': 'string'}
-        }
-        
+        scheme = {'name': {'type': 'string'}}
         val = Validator(scheme)
         amenity_data = api.payload
         amenity = facade.get_amenity(amenity_id)
