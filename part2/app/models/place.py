@@ -8,19 +8,45 @@ class Place(BaseModel):
         else:
             raise ValueError("Title is too long")
         self.description = description
-        self.price = abs(price)
-        if latitude >= -90 and latitude <= 90:
-            self.latitude = latitude
-        else:
-            raise ValueError("Latitude is out of range")
-        if longitude >= -180 and longitude <= 180:
-            self.longitude = longitude
-        else:
-            raise ValueError("Longitude is out of range")
+        self.price = price
+        self.latitude = latitude
+        self.longitude = longitude
         self.owner = owner
         self.reviews = []  # List to store related reviews
         self.amenities = []  # List to store related amenities
-
+        
+    @property
+    def price(self):
+        return self.price
+    
+    @price.setter
+    def price(self, value):
+        if not isinstance(value, float):
+            raise ValueError("Invalid type value")
+        else:
+            self.price = abs(value)
+    
+    @property
+    def latitude(self):
+        return self.latitude
+    
+    @latitude.setter
+    def latitude(self, value):
+        if value >= -90 and value <= 90:
+            return self.latitude == value
+        else:
+            raise ValueError("Latitude is out of range")
+    @property
+    def longitude(self):
+        return self.longitude
+    
+    @longitude.setter
+    def longitude(self, value):
+        if value >= -180 and value <= 180:
+            return self.longitude == value
+        else:
+            raise ValueError("Longitude out of range")
+        
     def add_review(self, review):
         """Add a review to the place."""
         self.reviews.append(review)

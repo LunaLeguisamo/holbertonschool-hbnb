@@ -3,11 +3,19 @@ from . import BaseModel
 class Amenity(BaseModel):
     def __init__(self, name=str):
         super().__init__()
-        if len(name) <= 50:
-            self.name = name
+        self.name = name
+        
+    @property
+    def name(self):
+        return self.name
+    
+    @name.setter
+    def name(self, string):
+        if len(string) <= 50:
+            return self.name == string
         else:
-            return "Name is too long"
-  
+            raise ValueError("Name is too long")
+    
     def __del__(self):
         #eliminar amenity
         return "Amenity deleted"
