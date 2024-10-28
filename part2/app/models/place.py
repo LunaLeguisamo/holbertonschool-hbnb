@@ -6,7 +6,7 @@ class Place(BaseModel):
         if len(title) <= 100:
             self.title = title
         else:
-            return "Title is too long"
+            raise ValueError("Title is too long")
         self.description = description
         self.price = abs(price)
         if latitude >= -90 and latitude <= 90:
