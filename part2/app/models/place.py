@@ -1,12 +1,12 @@
 from . import BaseModel
 from app.models.user import User
 class Place(BaseModel):
-    def __init__(self, title:str, description:str, price:float, latitude:float, longitude:float, owner_id: User, amenities, reviews):
+    def __init__(self, title:str, description:str, price:float, latitude:float, longitude:float, owner_id: User, amenities=None, reviews=None):
         super().__init__()
         if len(title) <= 100:
             self.title = title
         else:
-            return "Title is too long"
+            raise ValueError("Title is too long")
         self.description = description
         self.price = abs(price)
         if latitude >= -90 and latitude <= 90:
@@ -18,8 +18,8 @@ class Place(BaseModel):
         else:
             raise ValueError("Longitude is out of range")
         self.owner_id = owner_id
-        self.reviews = []  # List to store related reviews
-        self.amenities = []  # List to store related amenities
+        self.reviews = reviews if reviews is not None else []  # List to store related reviews
+        self.amenities = amenities if amenities is not None else []  # List to store related amenities
 
     def add_review(self, review):
         """Add a review to the place."""
