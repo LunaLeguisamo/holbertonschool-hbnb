@@ -63,20 +63,15 @@ class PlaceList(Resource):
 
         list_amenities = []
         amenity_id_list = place_data.get('amenities')# ["lakfj-efa-323-423", "sadsad-25h-45d3-d323"]
+        if not amenity_id_list:
+            return {'error': 'Amenity not found'}, 404
         for amenity_id in amenity_id_list:
             amenity = facade.get_amenity(amenity_id)
             if not amenity:
                 return {'error': 'Not found'}
-            list_amenities.append(amenity)
-            
+            list_amenities.append(amenity)    
         place_data['amenities'] = list_amenities
-        # "lakfj-efa-323-423" -> Amenity{"id": "lakfj-efa-323-423", "name": "WiFi"}
-        # "sadsad-25h-45d3-d323" -> Amenity{"id": "sadsad-25h-45d3-d323", "name": "Pool"}
         
-        # amenity_list -> [Amenity{"id": "sadsad-25h-45d3-d323", "name": "Pool"}, Amenity{"id": "lakfj-efa-323-423", "name": "WiFi"}]
-
-        # amenity = facade.get_amenity(amenity_id)
-
         try:
             new_place = facade.create_place(place_data)
             
