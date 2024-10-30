@@ -414,3 +414,70 @@ Descripción del error: El sistema aceptó datos inválidos (`text` vacío y `ra
      }
      ```
 Descripción del error: El sistema aceptó datos inválidos (`name` demasiado largo) y generó un nuevo amenity en lugar de rechazar la solicitud.
+
+
+# Documentación de Pruebas con Pytest
+
+## Introducción
+Esta sección documenta las pruebas automatizadas realizadas utilizando `pytest` en el proyecto **HBnB**. A continuación, se describen las pruebas específicas y los resultados obtenidos.
+
+#### Entorno de Prueba
+- **Sistema Operativo**: Linux
+- **Python**: 3.10.12
+- **Framework de pruebas**: Pytest 8.3.3
+---
+
+### Prueba: `test_users.py`
+
+#### Descripción
+El archivo `test_users.py` contiene pruebas para la funcionalidad relacionada con los usuarios en el sistema. Estas pruebas aseguran que las funcionalidades básicas de creación y validación de usuarios cumplen con los requisitos especificados.
+
+#### Comando de Ejecución
+Para ejecutar la prueba, se utilizó el siguiente comando desde el directorio `tests`:
+
+```bash
+pytest test_users.py
+```
+### Resultado Esperado
+El sistema debe pasar todas las pruebas definidas en test_users.py sin errores.
+### Resultado Obtenido
+```txt
+=========================================================================================== test session starts ============================================================================================
+platform linux -- Python 3.10.12, pytest-8.3.3, pluggy-1.5.0
+rootdir: /home/balemansteve/holbertonschool-hbnb/part2/tests
+collected 2 items                                                                                                                                                                                          
+
+test_users.py .F                                                                                                                                                                                     [100%]
+
+================================================================================================= FAILURES =================================================================================================
+______________________________________________________________________________________ test_creacion_usuario_invalida ______________________________________________________________________________________
+
+    def test_creacion_usuario_invalida():  # Prueba de creacion de usuario invalida
+        data = {
+            "first_name": "",
+            "last_name": "",
+            "email": "lbutterley0"
+        }
+        response = requests.post(f"{BASE_URL}/users/", json=data)
+>       assert response.status_code == 400
+E       assert 201 == 400
+E        +  where 201 = <Response [201]>.status_code
+
+test_users.py:29: AssertionError
+========================================================================================= short test summary info ==========================================================================================
+FAILED test_users.py::test_creacion_usuario_invalida - assert 201 == 400
+======================================================================================= 1 failed, 1 passed in 0.15s ========================================================================================
+```
+
+
+
+### Análisis del Resultado
+ - **Prueba `test_creacion_usuario_valida`**    
+     Código de estado esperado: `201 Created`  
+     Código de estado recibido: `201 Created`   
+     Resultado: `Pasó`, el usuario fue creado exitosamente.      
+
+ - **Prueba `test_creacion_usuario_invalida`**    
+     Código de estado esperado: `400 Bad Request`  
+     Código de estado recibido: `201 Created`   
+     Resultado: `Falló`, el sistema permitió la creación de un usuario con datos inválidos.
