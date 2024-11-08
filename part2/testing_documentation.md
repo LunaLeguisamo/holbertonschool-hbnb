@@ -66,24 +66,24 @@ Probar la validación de los datos en los endpoints
      ```
 
 
-## Prueba de Creación de Usuario Inválida
+## Prueba de Creación de Usuario Inválida (campos vacíos)
 
 
 
 | **Endpoint** | `/api/v1/users/` |
 |--------------|-------------------------|
-| **Descripción** | Crea un nuevo usuario con datos inválidos. |
+| **Descripción** | Crea un nuevo usuario con campos vacíos. |
 | **Cuerpo de la Petición** | JSON con atributos `first_name`, `last_name`, `email`. |
 | **Tipo de Petición** | POST |
   
-   - **Descripción:** Confirmar que el sistema rechaza entradas inválidas, mostrando un error en la respuesta.
-   - **Datos de Entrada:** Usamos cURL para enviar una solicitud con campos vacíos y un formato de correo electrónico inválido, y retornar código de estado.   
+   - **Descripción:** Confirmar que el sistema rechaza entradas con campos vacíos, mostrando un error en la respuesta.
+   - **Datos de Entrada:** Usamos cURL para enviar una solicitud con campos vacíos y retornar código de estado.   
 
      ```bash
      curl -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{
      "first_name": "",
      "last_name": "",
-     "email": "invalid-email"
+     "email": ""
      }' -w "%{http_code}\n"
      ```
    - **Respuesta Esperada:**  
@@ -103,13 +103,56 @@ Probar la validación de los datos en los endpoints
      "id": "9511d94b-e374-4165-9f76-a5a5b6064987", // ID generado
      "first_name": "",
      "last_name": "",
-     "email": "invalid-email"
+     "email": ""
      }
      ```
-     Descripción del error: El sistema aceptó datos inválidos (`first_name` y `last_name` vacíos y formato de `email` incorrecto) y generó un nuevo usuario en lugar de rechazar la solicitud.
+     Descripción del error: El sistema aceptó datos inválidos (`first_name`, `last_name` y `email` vacíos) y generó un nuevo usuario en lugar de rechazar la solicitud.
 
 
-## Prueba de Creación de Lugar Válida
+## Prueba de Creación de Usuario Inválida (email inválido)
+
+
+
+| **Endpoint** | `/api/v1/users/` |
+|--------------|-------------------------|
+| **Descripción** | Crea un nuevo usuario con email inválido. |
+| **Cuerpo de la Petición** | JSON con atributos `first_name`, `last_name`, `email`. |
+| **Tipo de Petición** | POST |
+  
+   - **Descripción:** Confirmar que el sistema rechaza la entrada de un campo inválido, mostrando un error en la respuesta.
+   - **Datos de Entrada:** Usamos cURL para enviar una solicitud con email inválido y retornar código de estado.   
+
+     ```bash
+     curl -X POST "http://127.0.0.1:5000/api/v1/users/" -H "Content-Type: application/json" -d '{
+     "first_name": "Lidia",
+     "last_name": "Butterley",
+     "email": "lbutterley"
+     }' -w "%{http_code}\n"
+     ```
+   - **Respuesta Esperada:**  
+     Código de estado: `400 Bad Request`  
+     Cuerpo de respuesta:
+     ```json
+     {
+     "error": "Invalid email format"
+     }
+     ```
+     
+   - **Resultado de la Prueba:** `Falló`  
+     Código de estado: `201 Created`  
+     Cuerpo de respuesta:
+     ```json
+     {
+     "id": "9511d94b-e374-4165-9f76-a5a5b6064987", // ID generado
+     "first_name": "Lidia",
+     "last_name": "Butterley",
+     "email": "lbutterley"
+     }
+     ```
+     Descripción del error: El sistema aceptó datos inválidos (`email` inválido) y generó un nuevo usuario en lugar de rechazar la solicitud.
+
+
+## Prueba de Creación de Lugar (place) Válida
 
 
 
@@ -120,7 +163,7 @@ Probar la validación de los datos en los endpoints
 | **Tipo de Petición** | POST |
   
    - **Descripción:** Comprobar que el endpoint acepta una solicitud con datos válidos y crea correctamente un lugar.
-   - **Datos de Entrada:** Usamos cURL para enviar una solicitud con datos válidos para crear un lugar y retornar el código de estado.  
+   - **Datos de Entrada:** Usamos cURL para enviar una solicitud con datos válidos para crear un lugar y retornar el código de estado, `owner_id` y `amenities` deben ser creados antes de la prueba y sustituir con sus `id` correspondientes.  
 
      ```bash
      curl -X POST "http://127.0.0.1:5000/api/v1/places/" \
@@ -131,7 +174,7 @@ Probar la validación de los datos en los endpoints
      "price": 150.00,
      "latitude": 45.0,
      "longitude": -70.0,
-     "owner_id": "a4ec44b7-8734-4116-9492-9aeb44eec988",
+     "owner_id": "a062b085-9432-489b-9bdf-0bab29b4e27a",
      "amenities": ["54bd4f2b-b122-4706-93f6-9b0952dce101"]
      }' -w "%{http_code}\n"
      ```
@@ -179,24 +222,24 @@ Probar la validación de los datos en los endpoints
      ```
 
 
-## Prueba de Creación de Lugar Inválida
+## Prueba de Creación de Lugar (place) Inválida
 
 
 
 | **Endpoint** | `/api/v1/places/` |
 |--------------|-------------------------|
-| **Descripción** | Intenta crear un nuevo lugar con un precio negativo y coordenadas fuera de rango. |
+| **Descripción** | Intenta crear un nuevo lugar con el campo del título vacío, un precio negativo y coordenadas fuera de rango. |
 | **Cuerpo de la Petición** | JSON con los atributos `title`, `description`, `price`, `latitude`, `longitude`, `owner_id` y `amenities`. |
 | **Tipo de Petición** | POST |
   
    - **Descripción:** Confirmar que el sistema rechaza entradas inválidas, mostrando un error en la respuesta.
-   - **Datos de Entrada:** Usamos cURL para enviar una solicitud con datos inválidos para crear un lugar y retornar el código de estado.  
+   - **Datos de Entrada:** Usamos cURL para enviar una solicitud con datos inválidos para crear un lugar y retornar el código de estado, `owner_id` y `amenities` deben ser creados antes de la prueba y sustituir con sus `id` correspondientes.    
 
      ```bash
      curl -X POST "http://127.0.0.1:5000/api/v1/places/" \
      -H "Content-Type: application/json" \
      -d '{
-     "title": "Hermosa Casa",
+     "title": "",
      "description": "Lugar tranquilo con una gran vista",
      "price": -150.00,
      "latitude": 95.0,
@@ -219,7 +262,7 @@ Probar la validación de los datos en los endpoints
      ```json
      {
      "id": "330c9a51-4ab4-4e40-b39f-6aa77f621f8c",
-     "title": "Hermosa Casa",
+     "title": "",
      "description": "Lugar tranquilo con una gran vista",
      "price": -50.0,
      "latitude": 95.0,
@@ -234,7 +277,7 @@ Probar la validación de los datos en los endpoints
      "reviews": []
      }
      ```
-Descripción del error: El sistema aceptó datos inválidos (`price` negativo y `latitude` y `longitude` fuera de rango) y generó un nuevo lugar en lugar de rechazar la solicitud.
+Descripción del error: El sistema aceptó datos inválidos (`title` vacío, `price` negativo y `latitude` y `longitude` fuera de rango) y generó un nuevo lugar en lugar de rechazar la solicitud.
 
 
 
@@ -427,7 +470,7 @@ Esta sección documenta las pruebas automatizadas realizadas utilizando `pytest`
 - **Framework de pruebas**: Pytest 8.3.3
 ---
 
-### Prueba: `test_users.py`
+## Prueba: `test_users.py`
 
 #### Descripción
 El archivo `test_users.py` contiene pruebas para la funcionalidad relacionada con los usuarios en el sistema. Estas pruebas aseguran que las funcionalidades básicas de creación y validación de usuarios cumplen con los requisitos especificados.
@@ -445,39 +488,280 @@ El sistema debe pasar todas las pruebas definidas en test_users.py sin errores.
 =========================================================================================== test session starts ============================================================================================
 platform linux -- Python 3.10.12, pytest-8.3.3, pluggy-1.5.0
 rootdir: /home/balemansteve/holbertonschool-hbnb/part2/tests
-collected 2 items                                                                                                                                                                                          
+collected 3 items                                                                                                                                                                                          
 
-test_users.py .F                                                                                                                                                                                     [100%]
+test_users.py .FF                                                                                                                                                                                    [100%]
 
 ================================================================================================= FAILURES =================================================================================================
-______________________________________________________________________________________ test_creacion_usuario_invalida ______________________________________________________________________________________
+_____________________________________________________________________________________ test_user_creation_empty_fields ______________________________________________________________________________________
 
-    def test_creacion_usuario_invalida():  # Prueba de creacion de usuario invalida
+    def test_user_creation_empty_fields():
+        '''
+        User creation test with empty fields.
+        '''
         data = {
             "first_name": "",
             "last_name": "",
-            "email": "lbutterley0"
+            "email": ""
         }
         response = requests.post(f"{BASE_URL}/users/", json=data)
 >       assert response.status_code == 400
 E       assert 201 == 400
 E        +  where 201 = <Response [201]>.status_code
 
-test_users.py:29: AssertionError
+test_users.py:33: AssertionError
+_____________________________________________________________________________________ test_user_creation_invalid_email _____________________________________________________________________________________
+
+    def test_user_creation_invalid_email():
+        '''
+        User creation test with invalid email.
+        '''
+        data = {
+            "first_name": "Lidia",
+            "last_name": "Butterley",
+            "email": "lbutterley"
+        }
+        response = requests.post(f"{BASE_URL}/users/", json=data)
+>       assert response.status_code == 400
+E       assert 201 == 400
+E        +  where 201 = <Response [201]>.status_code
+
+test_users.py:47: AssertionError
 ========================================================================================= short test summary info ==========================================================================================
-FAILED test_users.py::test_creacion_usuario_invalida - assert 201 == 400
-======================================================================================= 1 failed, 1 passed in 0.15s ========================================================================================
+FAILED test_users.py::test_user_creation_empty_fields - assert 201 == 400
+FAILED test_users.py::test_user_creation_invalid_email - assert 201 == 400
+======================================================================================= 2 failed, 1 passed in 0.16s ========================================================================================
 ```
 
 
 
 ### Análisis del Resultado
- - **Prueba `test_creacion_usuario_valida`**    
+ - **Prueba `test_user_creation_valid`**  
+     Descripción: Crea un usuario con datos válidos.  
      Código de estado esperado: `201 Created`  
      Código de estado recibido: `201 Created`   
      Resultado: `Pasó`, el usuario fue creado exitosamente.      
 
- - **Prueba `test_creacion_usuario_invalida`**    
+ - **Prueba `test_user_creation_empty_fields`**  
+     Descripción: Crea un usuario con campos vacíos.   
      Código de estado esperado: `400 Bad Request`  
      Código de estado recibido: `201 Created`   
-     Resultado: `Falló`, el sistema permitió la creación de un usuario con datos inválidos.
+     Resultado: `Falló`, el sistema permitió la creación de un usuario con campos vacíos.
+
+ - **Prueba `test_user_creation_invalid_email`**  
+     Descripción: Crea un usuario con email inválido.    
+     Código de estado esperado: `400 Bad Request`  
+     Código de estado recibido: `201 Created`   
+     Resultado: `Falló`, el sistema permitió la creación de un usuario con email inválido.
+
+
+
+
+## Prueba: `test_places.py`
+
+#### Descripción
+El archivo `test_places.py` contiene pruebas para la funcionalidad relacionada con la creación de lugares (places) en el sistema. Estas pruebas aseguran que las funcionalidades básicas de creación y validación de lugares cumplen con los requisitos especificados.
+
+#### Comando de Ejecución
+Para ejecutar la prueba, se utilizó el siguiente comando desde el directorio `tests`:
+
+```bash
+pytest test_places.py
+```
+### Resultado Esperado
+El sistema debe pasar todas las pruebas definidas en test_places.py sin errores.
+### Resultado Obtenido
+```txt
+balemansteve@DESKTOP-PPJI7L7:~/holbertonschool-hbnb/part2/tests$ pytest test_places.py 
+=========================================================================================== test session starts ============================================================================================
+platform linux -- Python 3.10.12, pytest-8.3.3, pluggy-1.5.0
+rootdir: /home/balemansteve/holbertonschool-hbnb/part2/tests
+collected 2 items                                                                                                                                                                                          
+
+test_places.py .F                                                                                                                                                                                    [100%]
+
+================================================================================================= FAILURES =================================================================================================
+_______________________________________________________________________________________ test_place_creation_invalid ________________________________________________________________________________________
+
+create_user = '698a05fd-42f2-4b8e-83a8-be955f216f25', create_amenity = '49cd2459-de1d-4438-84ab-3ada9b5d50f8'
+
+    def test_place_creation_invalid(create_user, create_amenity):
+        """
+        Place creation test with invalid data.
+        """
+        data = {
+            "title": "",
+            "description": "Lugar tranquilo con una gran vista",
+            "price": -150.00,
+            "latitude": 95.0,
+            "longitude": -200.0,
+            "owner_id": create_user,  # Replace with valid owner_id
+            "amenities": [create_amenity]  # Replace with valid amenity
+        }
+        response = requests.post(f"{BASE_URL}/places/", json=data)
+>       assert response.status_code == 400
+E       assert 201 == 400
+E        +  where 201 = <Response [201]>.status_code
+
+test_places.py:65: AssertionError
+========================================================================================= short test summary info ==========================================================================================
+FAILED test_places.py::test_place_creation_invalid - assert 201 == 400
+======================================================================================= 1 failed, 1 passed in 0.17s ========================================================================================
+```
+
+
+
+### Análisis del Resultado
+ - **Prueba `test_place_creation_valid`**  
+     Descripción: Crea un lugar con datos válidos.  
+     Código de estado esperado: `201 Created`  
+     Código de estado recibido: `201 Created`   
+     Resultado: `Pasó`, el lugar fue creado exitosamente.      
+
+ - **Prueba `test_place_creation_invalid`**  
+     Descripción: Crea un lugar con el título vacío, precio negativo y coordenadas fuera de rango.   
+     Código de estado esperado: `400 Bad Request`  
+     Código de estado recibido: `201 Created`   
+     Resultado: `Falló`, el sistema permitió la creación de un lugar con campos inválidos.
+
+
+
+## Prueba: `test_reviews.py`
+
+#### Descripción
+El archivo `test_reviews.py` contiene pruebas para la funcionalidad relacionada con la creación de reseñas en el sistema. Estas pruebas aseguran que las funcionalidades básicas de creación y validación de reseñas cumplen con los requisitos especificados.
+
+#### Comando de Ejecución
+Para ejecutar la prueba, se utilizó el siguiente comando desde el directorio `tests`:
+
+```bash
+pytest test_reviews.py
+```
+### Resultado Esperado
+El sistema debe pasar todas las pruebas definidas en test_reviews.py sin errores.
+### Resultado Obtenido
+```txt
+balemansteve@DESKTOP-PPJI7L7:~/holbertonschool-hbnb/part2/tests$ pytest test_reviews.py 
+=========================================================================================== test session starts ============================================================================================
+platform linux -- Python 3.10.12, pytest-8.3.3, pluggy-1.5.0
+rootdir: /home/balemansteve/holbertonschool-hbnb/part2/tests
+collected 4 items                                                                                                                                                                                          
+
+test_reviews.py FFFF                                                                                                                                                                                 [100%]
+
+================================================================================================= FAILURES =================================================================================================
+________________________________________________________________________________________ test_review_creation_valid ________________________________________________________________________________________
+
+create_place = '119fd582-0cd8-4088-9743-018a845a062f', create_user = 'cdea5c05-149b-4ed7-b33c-459066912941'
+
+    def test_review_creation_valid(create_place, create_user):
+        """
+        Create a valid review.
+        """
+        data = {
+            "text": "Lugar excelente, me gustó mucho.",
+            "rating": 5,
+            "place_id": create_place,
+            "user_id": create_user
+        }
+        response = requests.post(f"{BASE_URL}/reviews/", json=data)
+>       assert response.status_code == 201
+E       assert 200 == 201
+E        +  where 200 = <Response [200]>.status_code
+
+test_reviews.py:55: AssertionError
+_____________________________________________________________________________________ test_review_creation_empty_text ______________________________________________________________________________________
+
+create_place = '119fd582-0cd8-4088-9743-018a845a062f', create_user = 'cdea5c05-149b-4ed7-b33c-459066912941'
+
+    def test_review_creation_empty_text(create_place, create_user):
+        """
+        Create a review with empty text.
+        """
+        data = {
+            "text": "",
+            "rating": 5,
+            "place_id": create_place,
+            "user_id": create_user
+        }
+        response = requests.post(f"{BASE_URL}/reviews/", json=data)
+>       assert response.status_code == 400
+E       assert 200 == 400
+E        +  where 200 = <Response [200]>.status_code
+
+test_reviews.py:70: AssertionError
+___________________________________________________________________________________ test_review_creation_invalid_user_id ___________________________________________________________________________________
+
+create_place = '119fd582-0cd8-4088-9743-018a845a062f'
+
+    def test_review_creation_invalid_user_id(create_place):
+        """
+        Create a invalid review with invalid user_id.
+        """
+        data = {
+            "text": "Review con usuario inválido.",
+            "rating": 5,
+            "place_id": create_place,
+            "user_id": "invald_id"
+        }
+        response = requests.post(f"{BASE_URL}/reviews/", json=data)
+>       assert response.status_code == 400
+E       assert 200 == 400
+E        +  where 200 = <Response [200]>.status_code
+
+test_reviews.py:85: AssertionError
+__________________________________________________________________________________ test_review_creation_invalid_place_id ___________________________________________________________________________________
+
+create_user = 'cdea5c05-149b-4ed7-b33c-459066912941'
+
+    def test_review_creation_invalid_place_id(create_user):
+        """
+        Create a invalid review with invalid place_id.
+        """
+        data = {
+            "text": "Review con lugar inválido.",
+            "rating": 5,
+            "place_id": "invalid_id",
+            "user_id": create_user
+        }
+        response = requests.post(f"{BASE_URL}/reviews/", json=data)
+>       assert response.status_code == 400
+E       assert 200 == 400
+E        +  where 200 = <Response [200]>.status_code
+
+test_reviews.py:100: AssertionError
+========================================================================================= short test summary info ==========================================================================================
+FAILED test_reviews.py::test_review_creation_valid - assert 200 == 201
+FAILED test_reviews.py::test_review_creation_empty_text - assert 200 == 400
+FAILED test_reviews.py::test_review_creation_invalid_user_id - assert 200 == 400
+FAILED test_reviews.py::test_review_creation_invalid_place_id - assert 200 == 400
+============================================================================================ 4 failed in 0.19s =============================================================================================
+```
+
+
+
+### Análisis del Resultado
+ - **Prueba `test_review_creation_valid`**  
+     Descripción: Crea una reseña válida.  
+     Código de estado esperado: `201 Created`  
+     Código de estado recibido: `200 OK`   
+     Resultado: `Falló`, el sistema no devolvió el estado correcto para la creación de una reseña válida.      
+
+ - **Prueba `test_review_creation_empty_text`**  
+     Descripción: Intenta crear una reseña con el texto vacío.   
+     Código de estado esperado: `400 Bad Request`  
+     Código de estado recibido: `200 OK`   
+     Resultado: `Falló`, el sistema permitió la creación de una reseña con un campo de texto vacío.
+
+ - **Prueba `test_review_creation_invalid_user_id`**  
+     Descripción: Intenta crear una reseña con un `user_id` inválido.   
+     Código de estado esperado: `400 Bad Request`  
+     Código de estado recibido: `200 OK`   
+     Resultado: `Falló`, el sistema aceptó una reseña con un id de usuario inválido.
+
+ - **Prueba `test_review_creation_invalid_place_id`**  
+     Descripción: Intenta crear una reseña con un `place_id` inválido.   
+     Código de estado esperado: `400 Bad Request`  
+     Código de estado recibido: `200 OK`   
+     Resultado: `Falló`, el sistema aceptó una reseña con un identificador de lugar inválido.
+
