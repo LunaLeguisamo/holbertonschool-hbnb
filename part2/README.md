@@ -9,6 +9,30 @@ HBnB Evolution is a property management application that allows users to add lis
 - **Business Logic Layer**: Manages core operations and data validation, including the main entities User, Place, Review, and Amenity.
 - **Persistence Layer**: Stores, retrieves, and deletes information, interacting with the database through an ORM.
 
+## Entity Models in Business Logic Layer ##
+
+### Users 
+- Represent the users of the application, who can be `owners` of places. Users have attributes.  
+- Attributes: `first name`, `last name`, `email` and `id`  
+### Places  
+- These are the places created by users (owners). Each place can also have amenities.
+- Attributes: `title`, `description`, `price`, `latitude`, `longitude`, `id`, `owner id` and `amenities`  
+### Amenities
+- These are the features or facilities that a place may offer, such as "Wi-Fi" or "Parking".
+- In the model, a place can have multiple amenities.
+- Attributes: `name` and `id`  
+### Reviews
+- These are the reviews of places, it's associated with a specific place and a specific user who wrote it.
+- Attributes: `text`, `rating`, `place id` and `user id`
+
+## Relationship ##
+
+- Users can own Places (one-to-many relationship).  
+- Places can have multiple Amenities and multiple Reviews.  
+- Amenities can belong to multiple Places (many-to-many relationship).  
+- Reviews are associated with both a User and a Place (many-to-one relationship with each).
+
+
 ## Setup and Installation ⚙️ 
 
 ### 1. Clone the repository
