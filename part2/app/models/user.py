@@ -1,16 +1,21 @@
 from . import BaseModel
 import re
+from flask_bcrypt import Bcrypt
+
+bcrypt = Bcrypt()
 
 class User(BaseModel):
     user_list = []
     
-    def __init__(self, first_name:str, last_name:str, email:str, is_admin=False):
+    def __init__(self, first_name:str, last_name:str, email:str, password:str, is_admin=False):
         super().__init__()
         self._first_name = first_name
         self._last_name = last_name
         self.is_admin = is_admin
         self._email = email
         self.places = []
+        # Hashes de password before storing it
+        self.password = self.hash_password(password)
         User.user_list.append(self) 
         
     @property
@@ -59,6 +64,14 @@ class User(BaseModel):
     
     def get_user_list(self):
         return User.user_list
- 
+    
+    def hash_password(self, password):
+        """Hashes the password before storing it."""
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+        
+    def verify_password(self, password):
+        """Verifies if the provided password matches the hashed password."""
+        return bcrypt.check_password_hash(self.password, password)
+    
     def __del__(self):
         return "User deleted"
