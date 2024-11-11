@@ -7,11 +7,10 @@ bcrypt = Bcrypt()
 class User(BaseModel):
     user_list = []
     
-    def __init__(self, first_name:str, last_name:str, email:str, password:str, is_admin=False):
+    def __init__(self, first_name:str, last_name:str, email:str, password:str):
         super().__init__()
         self._first_name = first_name
         self._last_name = last_name
-        self.is_admin = is_admin
         self._email = email
         self.places = []
         # Hashes de password before storing it
