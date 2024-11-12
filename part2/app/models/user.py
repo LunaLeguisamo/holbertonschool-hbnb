@@ -11,7 +11,7 @@ class User(BaseModel):
         super().__init__()
         self._first_name = first_name
         self._last_name = last_name
-        self._email = email
+        self._email = self.validar_email(email)
         self.is_admin = is_admin
         self.places = []
         # Hashes de password before storing it
@@ -54,9 +54,9 @@ class User(BaseModel):
     def validar_email(self, email):
         val = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if re.match(val, email):
-            return True
+            return email
         else:
-            return False
+            raise ValueError("Invalid email")
     
     def add_places(self, place):
         self.places.append(place)
@@ -68,7 +68,6 @@ class User(BaseModel):
     def hash_password(self, password):
         """Hashes the password before storing it."""
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
-        print(self.password)
         
     def verify_password(self, password):
         """Verifies if the provided password matches the hashed password."""

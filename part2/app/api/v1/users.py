@@ -1,6 +1,8 @@
 from flask_restx import Namespace, Resource, fields, marshal
 from app.services import facade
 from cerberus import Validator
+from flask import Flask, jsonify
+
 
 api = Namespace('users', description='User operations')
 
@@ -11,6 +13,7 @@ user_model = api.model('User', {
     'email': fields.String(required=True, description='Email of the user'),
     'password': fields.String(required=True, description='Password of the user')
 })
+
 
 @api.route('/')
 class UserList(Resource):
@@ -34,11 +37,11 @@ class UserList(Resource):
     @api.response(200, 'List of users retrieved successfully')
     def get(self):
         list_users = facade.list_users()
-        return marshal(list_users, user_model), 200
+        return [{'id': list.id, 'first_name': list.first_name, 'last_name': list.last_name, 'email': list.email}
+                for list in list_users], 200
 
 @api.route('/<user_id>')
 class UserResource(Resource):
-    @api.expect(user_model, validate=True)
     @api.response(200, 'User details retrieved successfully')
     @api.response(404, 'User not found')
     def get(self, user_id):
@@ -46,6 +49,7 @@ class UserResource(Resource):
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
+    
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
     
     @api.expect(user_model)
