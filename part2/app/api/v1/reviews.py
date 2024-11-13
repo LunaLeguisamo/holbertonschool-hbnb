@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields, marshal
 from app.services import facade
 from cerberus import Validator
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 api = Namespace('reviews', description='Review operations')
@@ -15,17 +16,22 @@ review_model = api.model('Review', {
 
 @api.route('/')
 class ReviewList(Resource):
+    @jwt_required()
     @api.expect(review_model)
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
         """Register a new review"""
         review_data = api.payload
+        place_id = review_data[place_id]
+        place_data = facade.get_place(place_id)
+        current_user = get_jwt_identity()
         
-        try:
-            new_review = facade.create_review(review_data)
-        except ValueError as e:
-            return {"error": str(e)}, 400
+        if current_user['id'] != place_data['owner_id']:
+            try:
+                new_review = facade.create_review(review_data)
+            except ValueError as e:
+                return {"error": str(e)}, 400
         
         return {'id': new_review.id ,'text': new_review.text, 'rating': new_review.rating,
                 'user_id': new_review.user_id, 'place_id': new_review.place_id}
@@ -38,6 +44,7 @@ class ReviewList(Resource):
 
 @api.route('/<review_id>')
 class ReviewResource(Resource):
+    @jwt_required()
     @api.response(200, 'Review details retrieved successfully')
     @api.response(404, 'Review not found')
     def get(self, review_id):
@@ -61,27 +68,36 @@ class ReviewResource(Resource):
             'rating': {'type': 'int'}, 
             'user_id': {'type': 'string'}, 
             'place_id': {'type': 'string'},
-            }
-        
+            } 
         val = Validator(scheme)
+        
         review_data = api.payload
+        current_user = get_jwt_identity()
         review = facade.get_place(review_id)
+        
         if not review:
             return {'error': 'Review not found'}, 404
-        elif val.validate(review_data):
-            facade.update_review(review_id, review_data)
-            return {"message": "Review updated successfully"}, 200
-        else:
-            return "Invalidate data", 400
+        
+        if current_user['id'] == review['user_id']:
+            if val.validate(review_data):
+                facade.update_review(review_id, review_data)
+                return {"message": "Review updated successfully"}, 200
+            else:
+                return "Invalidate data", 400
 
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
         """Delete a review"""
         review = facade.get_review(review_id)
+        current_user = get_jwt_identity()
         if review:
-            facade.delete_review(review_id)
-            return {"message": "Review deleted successfully"}, 200
+            if current_user['id'] == review['user_id']:
+            
+                facade.delete_review(review_id)
+                return {"message": "Review deleted successfully"}, 200
+            else:
+                return {'error': 'Invalid owner'}
         else:
             return {"error": "Review not found"}, 404
 

@@ -11,7 +11,7 @@ class User(BaseModel):
         super().__init__()
         self._first_name = first_name
         self._last_name = last_name
-        self._email = self.validar_email(email)
+        self._email = email
         self.is_admin = is_admin
         self.places = []
         # Hashes de password before storing it
@@ -73,6 +73,3 @@ class User(BaseModel):
     def verify_password(self, password):
         """Verifies if the provided password matches the hashed password."""
         return bcrypt.check_password_hash(self.password, password)
-    
-    def __del__(self):
-        return "User deleted"

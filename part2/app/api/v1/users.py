@@ -1,6 +1,12 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from app.models.user import User
 from cerberus import Validator
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_bcrypt import Bcrypt
+
+
+bcrypt = Bcrypt()
 
 api = Namespace('users', description='User operations')
 
@@ -12,6 +18,12 @@ user_model = api.model('User', {
     'password': fields.String(required=True, description='Password of the user')
 })
 
+# user_response_model = api.model(
+#     'UserResponse',
+#     user_model.clone('UserResponse', {
+#         'first_name': fields.String(required=True, description='First name of the user'),
+#         'last_name': fields.String(required=True, description='Last name of the user')
+#     }))
 
 @api.route('/')
 class UserList(Resource):
@@ -40,6 +52,7 @@ class UserList(Resource):
 
 @api.route('/<user_id>')
 class UserResource(Resource):
+    @jwt_required()
     @api.response(200, 'User details retrieved successfully')
     @api.response(404, 'User not found')
     def get(self, user_id):
@@ -47,32 +60,34 @@ class UserResource(Resource):
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
-    
+        
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
     
+    @jwt_required()
     @api.expect(user_model)
-    @api.response(200, 'User updated successfully')
+    @api.response(200, 'User updated successfully', user_model)
     @api.response(404, 'User not found')
     @api.response(400, 'Invalid input data')
     def put(self, user_id):
-        scheme = {
-            'first_name': {'type': 'string'},
-            'last_name': {'type': 'string'},
-            'email': {'type': 'string', 'regex': r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'}
-        }
-        
-        val = Validator(scheme)
+        current_user = get_jwt_identity()
         user_data = api.payload
         user = facade.get_user(user_id)
         if not user:
             return {'error': 'User not found'}, 404
-        
-        if val.validate(user_data):
-            existing_user = facade.get_user_by_email(user_data['email'])
-            if existing_user:
-                return {'error': 'email already exist'}, 400
-            else:
-                facade.update_user(user_id, user_data)
-                return "User updated", 200
+        print(current_user)
+        if current_user['id'] == user.id:
+            print("chau")
+            #existing_user = facade.get_user_by_email(user_data['email'])
+            #if existing_user:
+            #    return {'error': 'email already exist'}, 400
+            print("hola")
+            if user_data['email'] != user.email:
+                return {'error': 'Cannot modify email'}, 400
+            print(user_data['password'])
+            if user.verify_password(user_data['password']):
+                return {'error': 'Cannot modify password'}, 400
+            facade.update_user(user_id, user_data)
+            print(user_data)
+            return {'User updated'}, 200
         else:
-            return "Invalidate data", 400
+            return {'error': 'Denied access'}, 400

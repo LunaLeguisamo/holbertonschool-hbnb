@@ -15,7 +15,3 @@ class Amenity(BaseModel):
             return self._name == string
         else:
             raise ValueError("Name is too long")
-    
-    def __del__(self):
-        #eliminar amenity
-        return "Amenity deleted"

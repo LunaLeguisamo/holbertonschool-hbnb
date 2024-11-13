@@ -75,6 +75,3 @@ class Place(BaseModel):
     def add_place(cls, place):
         cls.places.append(place)
 
-    def __del__(self):
-        #eliminar place
-        return "Place deleted"

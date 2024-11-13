@@ -20,6 +20,4 @@ class Review(BaseModel):
             self.rating = value
         else:
             raise ValueError("Rating must be between 1 and 5")
-            
-    def __del__(self):
-        return "Review deleted"
+    
