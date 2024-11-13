@@ -1,8 +1,6 @@
-from flask_restx import Namespace, Resource, fields, marshal
+from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from cerberus import Validator
-from flask import Flask, jsonify
-
 
 api = Namespace('users', description='User operations')
 

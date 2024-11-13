@@ -2,6 +2,8 @@ from flask_restx import Namespace, Resource, fields, marshal
 from app.services import facade
 from app.models.user import User
 from cerberus import Validator
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 
 api = Namespace('places', description='Place operations')
 
@@ -33,7 +35,7 @@ place_model = api.model('Place', {
     'latitude': fields.Float(required=True, description='Latitude of the place'),
     'longitude': fields.Float(required=True, description='Longitude of the place'),
     'owner_id': fields.String(required=True, description='ID of the owner'),
-    'amenities': fields.List(fields.String(description='List of amenities')),
+    'amenities': fields.List(fields.String(description='List of amenities'))
 })
 
 
@@ -68,7 +70,7 @@ class PlaceList(Resource):
         for amenity_id in amenity_id_list:
             amenity = facade.get_amenity(amenity_id)
             if not amenity:
-                return {'error': 'Not found'}
+                return {'error': 'Amenity not found'}
             list_amenities.append(amenity)    
         place_data['amenities'] = list_amenities
         
@@ -77,8 +79,7 @@ class PlaceList(Resource):
             
             # list_ameni = []
             # for amen in new_place.amenities:
-            #     list_ameni.append({'id': amen.id, 'name': amen.name})
-            
+            #     list_ameni.append({'id': amen.id, 'name': amen.name}) 
             return {
                 'id': new_place.id,
                 'title': new_place.title,
@@ -90,9 +91,8 @@ class PlaceList(Resource):
                 'amenities': [
                     {'id': amen.id, 'name': amen.name}
                     for amen in new_place.amenities
-                ],
-                'reviews': []
-            }, 201
+                ]
+                    }, 201
         except ValueError as e:
             return {"error": str(e)}, 400
         
@@ -122,8 +122,10 @@ class PlaceResource(Resource):
                           'last_name': place.owner.last_name,
                           'email': place.owner.email
                           }, 
-                'amenities': [{'id': place.amenities.id ,
-                               'name': place.amenities.name} for amenity in place.amenities]
+                'amenities': [
+                    {'id': amenity.id,'name': amenity.name}
+                    for amenity in place.amenities
+                    ]
                 }, 200
 
     @api.expect(place_model)
