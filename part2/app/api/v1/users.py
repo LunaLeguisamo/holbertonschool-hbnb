@@ -15,7 +15,8 @@ user_model = api.model('User', {
     'first_name': fields.String(required=True, description='First name of the user'),
     'last_name': fields.String(required=True, description='Last name of the user'),
     'email': fields.String(required=True, description='Email of the user'),
-    'password': fields.String(required=True, description='Password of the user')
+    'password': fields.String(required=True, description='Password of the user'),
+    'is_admin': fields.Boolean(required=True, description="Rol of the user")
 })
 
 user_response_model = api.model(
@@ -30,9 +31,15 @@ class UserList(Resource):
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
+    @jwt_required()
     def post(self):
         """Register a new user"""
-        user_data = api.payload  
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
+            return {'error': 'Admin privileges required'}, 403
+        
+        user_data = api.payload
+        
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             return {'error': 'Email already registered'}, 400
@@ -41,7 +48,7 @@ class UserList(Resource):
         except ValueError as e:
             return {"error": str(e)}, 400
         
-        return {'id': new_user.id}, 201
+        return {'id': new_user.id, 'messagge': 'User successfully created'}, 201
     
     @api.response(200, 'List of users retrieved successfully')
     def get(self):
@@ -63,12 +70,16 @@ class UserResource(Resource):
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
     
     @jwt_required()
-    @api.expect(user_response_model)
+    @api.expect(user_model)
     @api.response(200, 'User updated successfully', user_model)
     @api.response(404, 'User not found')
     @api.response(400, 'Invalid input data')
     def put(self, user_id):
         current_user = get_jwt_identity()
+        
+        if not current_user.get('is_admin'):
+            return {'error': 'Admin privileges required'}, 403
+        
         user_data = api.payload
         
         user = facade.get_user(user_id)
@@ -81,22 +92,31 @@ class UserResource(Resource):
         if current_user['id'] != user.id:
             return {'error': 'Denied access'}, 400
         
-        print("chau")
-        #existing_user = facade.get_user_by_email(user_data['email'])
-        #if existing_user:
-        #    return {'error': 'email already exist'}, 400
-        if "email" in user_data:
-            return {'error': 'Cannot modify email'}, 400
+        email = user_data.get('email')
+        password = user_data.get('password')
+        
+        if email:
+            existing_user = facade.get_user_by_email(email)
+            if existing_user and existing_user.id != user_id:
+                return {'error': 'email is already in use'}, 400
+        
+        if password:
+            new_password = User.hash_password(password)
+            user_data['password'] = new_password
+        
+        # if "email" in user_data:
+        #     return {'error': 'Cannot modify email'}, 400
 
-        if "password" in user_data:
-            return {'error': 'Cannot modify password'}, 400
+        # if "password" in user_data:
+        #     return {'error': 'Cannot modify password'}, 400
 
-        correct_data = {
-            "first_name": user_data.get("first_name"),
-            "last_name": user_data.get("last_name")
-        }
+        # correct_data = {
+        #     "first_name": user_data.get("first_name"),
+        #     "last_name": user_data.get("last_name")
+        # }
 
-        facade.update_user(user_id, correct_data)
+        # facade.update_user(user_id, correct_data)
+        facade.update_user(user_id, user_model)
         print(user_data)
         print("xd")
         return {'id': user.id,'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
