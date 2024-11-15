@@ -78,8 +78,8 @@ class HBnBFacade:
         list_r = self.review_repo.get_all()
         return list_r
 
-    def get_reviews_by_place(self, place_id):
-        list_pr = self.review_repo.get_by_attribute(place_id)
+    def get_reviews_by_place(self, review_id, place_id):
+        list_pr = self.review_repo.get_by_attribute(review_id, place_id)
         return list_pr
 
     def update_review(self, review_id, review_data):
@@ -88,3 +88,6 @@ class HBnBFacade:
 
     def delete_review(self, review_id):
         self.review_repo.delete(review_id)
+        
+    def delete_place(self, place_id):
+        self.place_repo.delete(place_id)

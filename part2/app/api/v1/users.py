@@ -25,31 +25,52 @@ user_response_model = api.model(
     'last_name': fields.String(required=True, description='Last name of the user')}
 )
 
-@api.route('/')
-class UserList(Resource):
+@api.route('/users/')
+class AdminUserModify(Resource):
     @api.expect(user_model, validate=True)
     @api.response(201, 'User successfully created')
     @api.response(400, 'Email already registered')
     @api.response(400, 'Invalid input data')
     @jwt_required()
     def post(self):
-        """Register a new user"""
-        current_user = get_jwt_identity()
-        if not current_user.get('is_admin'):
-            return {'error': 'Admin privileges required'}, 403
-        
+        """Register a new user as an admin"""
         user_data = api.payload
-        
+        current_user = get_jwt_identity()
+
+        if not current_user or current_user.get('is_admin'):
+            existing_user = facade.get_user_by_email(user_data['email'])
+
+            if existing_user:
+                return {'error': 'Email already registered'}, 400
+            
+            try:
+                new_user = facade.create_user(user_data)
+                return {'id': new_user.id, 'messagge': 'User successfully created'}, 201
+            except ValueError as e:
+                return {"error": str(e)}, 400
+        return {'error': 'Admin privileges required'}, 403
+
+@api.route('/')
+class UserList(Resource):
+    @api.expect(user_model, validate=True)
+    @api.response(201, 'User successfully created')
+    @api.response(400, 'Email already registered')
+    @api.response(400, 'Invalid input data')
+    def post(self):
+        """Register a new user"""
+        user_data = api.payload
         existing_user = facade.get_user_by_email(user_data['email'])
+        
         if existing_user:
             return {'error': 'Email already registered'}, 400
+        
         try:
             new_user = facade.create_user(user_data)
         except ValueError as e:
             return {"error": str(e)}, 400
-        
         return {'id': new_user.id, 'messagge': 'User successfully created'}, 201
-    
+        
+
     @api.response(200, 'List of users retrieved successfully')
     def get(self):
         list_users = facade.list_users()
@@ -70,16 +91,11 @@ class UserResource(Resource):
         return {'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
     
     @jwt_required()
-    @api.expect(user_model)
+    @api.expect(user_response_model)
     @api.response(200, 'User updated successfully', user_model)
     @api.response(404, 'User not found')
     @api.response(400, 'Invalid input data')
     def put(self, user_id):
-        current_user = get_jwt_identity()
-        
-        if not current_user.get('is_admin'):
-            return {'error': 'Admin privileges required'}, 403
-        
         user_data = api.payload
         
         user = facade.get_user(user_id)
@@ -87,37 +103,55 @@ class UserResource(Resource):
         if not user:
             return {'error': 'User not found'}, 404
         
-        print(current_user)
+        current_user = get_jwt_identity()
         
         if current_user['id'] != user.id:
             return {'error': 'Denied access'}, 400
         
-        email = user_data.get('email')
-        password = user_data.get('password')
-        
-        if email:
-            existing_user = facade.get_user_by_email(email)
-            if existing_user and existing_user.id != user_id:
-                return {'error': 'email is already in use'}, 400
-        
-        if password:
-            new_password = User.hash_password(password)
-            user_data['password'] = new_password
-        
-        # if "email" in user_data:
-        #     return {'error': 'Cannot modify email'}, 400
+        if "email" in user_data:
+            return {'error': 'Cannot modify email'}, 400
 
-        # if "password" in user_data:
-        #     return {'error': 'Cannot modify password'}, 400
+        if "password" in user_data:
+            return {'error': 'Cannot modify password'}, 400
 
-        # correct_data = {
-        #     "first_name": user_data.get("first_name"),
-        #     "last_name": user_data.get("last_name")
-        # }
+        correct_data = {
+            "first_name": user_data.get("first_name"),
+            "last_name": user_data.get("last_name")
+        }
 
-        # facade.update_user(user_id, correct_data)
-        facade.update_user(user_id, user_model)
-        print(user_data)
-        print("xd")
+        facade.update_user(user_id, correct_data)
         return {'id': user.id,'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200
-    
+
+    @api.route('/users/<user_id>')
+    @api.expect(user_model)
+    @api.response(200, 'User updated successfully', user_model)
+    @api.response(404, 'User not found')
+    @api.response(400, 'Invalid input data')
+    class AdminUserResource(Resource):
+        @jwt_required()
+        def put(self, user_id):
+            user_data = api.payload
+            user = facade.get_user(user_id)
+            
+            if not user:
+                return {'error': 'User not found'}, 404
+            
+            current_user = get_jwt_identity()
+            
+            if not current_user.get('is_admin'):
+                return {'error': 'Admin privileges required'}, 403
+            
+            email = user_data.get('email')
+            
+            if email:
+                existing_user = facade.get_user_by_email(email)
+                if existing_user and existing_user.id != user_id:
+                    return {'error': 'email is already in use'}, 400
+            user_data['email'] = email
+                
+            # if password:
+            #     new_password = User.hash_password(password)
+            #     user_data['password'] = new_password
+            print(user_model)
+            facade.update_user(user_id, user_data)
+            return {'id': user.id,'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email}, 200

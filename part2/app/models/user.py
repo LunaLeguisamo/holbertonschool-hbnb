@@ -24,7 +24,7 @@ class User(BaseModel):
     
     @first_name.setter
     def first_name(self, string):
-        if len(string) <= 50 and isinstance(string, str):
+        if isinstance(string, str) and len(string) <= 50:
             self._first_name = string
         else:
             raise ValueError("Name is too long")
