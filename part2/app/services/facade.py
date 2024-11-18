@@ -46,8 +46,7 @@ class HBnBFacade:
         return list_a
 
     def update_amenity(self, amenity_id, amenity_data):
-        update_a = self.amenity_repo.update(amenity_id, amenity_data)
-        return update_a
+        return self.amenity_repo.update(amenity_id, amenity_data)
     
     def create_place(self, place_data):
         place = Place(**place_data)
@@ -78,8 +77,8 @@ class HBnBFacade:
         list_r = self.review_repo.get_all()
         return list_r
 
-    def get_reviews_by_place(self, review_id, place_id):
-        list_pr = self.review_repo.get_by_attribute(review_id, place_id)
+    def get_reviews_by_place(self, place_id):
+        list_pr = self.review_repo.get_by_attribute("place_id", place_id)
         return list_pr
 
     def update_review(self, review_id, review_data):

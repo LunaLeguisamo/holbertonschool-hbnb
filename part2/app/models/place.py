@@ -5,11 +5,11 @@ class Place(BaseModel):
     
     def __init__(self, title:str, description:str, price:float, latitude:float, longitude:float, owner, amenities=None):
         super().__init__()
-        self._title = title
+        self.title = title
         self.description = description
-        self._price = price
-        self._latitude = latitude
-        self._longitude = longitude
+        self.price = price
+        self.latitude = latitude
+        self.longitude = longitude
         self.owner = owner
         if amenities is None:
             self.amenities = []  # List to store related amenities
@@ -23,7 +23,7 @@ class Place(BaseModel):
     
     @title.setter
     def title(self, value):
-        if value <= 100:
+        if len(value) <= 100:
             self._title = value
         else:
             raise ValueError("Title is too long")

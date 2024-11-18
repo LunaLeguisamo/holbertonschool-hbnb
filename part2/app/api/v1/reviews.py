@@ -10,7 +10,7 @@ api = Namespace('reviews', description='Review operations')
 review_model = api.model('Review', {
     'text': fields.String(required=True, description='Text of the review'),
     'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
-    'user_id': fields.String(required=True, description='ID of the user'),
+    'user_id': fields.String(required=True, description='User ID'),
     'place_id': fields.String(required=True, description='ID of the place')
 })
 
@@ -27,21 +27,27 @@ class ReviewList(Resource):
         place_data = facade.get_place(place_id)
         current_user = get_jwt_identity()
         
-        list_review =  facade.get_reviews_by_place(review_data['id'], place_id)
         
+        list_review =  facade.get_reviews_by_place(place_id)
+        print(list_review)
         if list_review:
             for review in list_review:
-                if review.user_id == review_data['user_id']:
+                if review.user_id == current_user['id']:
                     return {'error': 'You have already reviewed this place'}, 400
                 continue
-                
-        if current_user['id'] != place_data['owner_id']:
+            
+        # def get_all(self):
+        # return list(self._storage.values())
+    
+        print(current_user['id'])
+        print(place_data.owner.id)
+        if current_user['id'] != place_data.owner.id:
             new_review = facade.create_review(review_data)
             return {
-                'id': new_review.id ,
+                'id': new_review.id,
                 'text': new_review.text,
                 'rating': new_review.rating,
-                'user_id': new_review.user_id,
+                'user_id': current_user['id'],
                 'place_id': new_review.place_id
                 }
         
@@ -59,15 +65,15 @@ class ReviewResource(Resource):
     @jwt_required()
     @api.response(200, 'Review details retrieved successfully')
     @api.response(404, 'Review not found')
-    def get(self, review_id):
+    def get(self, place_id):
         """Get review details by ID"""
-        review = facade.get_review(review_id)
+        reviews = facade.get_reviews_by_place(place_id)
 
-        if not review:
-            return {'error': 'Review not found'}, 404
+        if not reviews:
+            return {'error': 'Reviews not found'}, 404
         
-        return {'id': review.id, 'text': review.text, 'rating': review.rating, 'user_id': review.user_id, 'place_id': review.place_id}
-
+        return {'reviews':
+            [{'id': review.id, 'text': review.text, 'rating': review.rating, 'user_id': review.user_id} for review in reviews]}        
     @api.expect(review_model)
     @api.response(200, 'Review updated successfully')
     @api.response(404, 'Review not found')
@@ -100,6 +106,7 @@ class ReviewResource(Resource):
 
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
+    @jwt_required
     def delete(self, review_id):
         """Delete a review"""
         review = facade.get_review(review_id)

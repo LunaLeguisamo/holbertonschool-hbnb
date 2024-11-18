@@ -3,7 +3,7 @@ from . import BaseModel
 class Amenity(BaseModel):
     def __init__(self, name: str):
         super().__init__()
-        self._name = name
+        self.name = name
         
     @property
     def name(self):
@@ -12,6 +12,6 @@ class Amenity(BaseModel):
     @name.setter
     def name(self, string):
         if len(string) <= 50:
-            return self._name == string
+            self._name = string
         else:
             raise ValueError("Name is too long")

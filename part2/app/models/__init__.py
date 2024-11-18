@@ -13,7 +13,10 @@ class BaseModel:
 
     def update(self, data):
         """Update the attributes of the object based on the provided dictionary"""
+        print({"data": data})
         for key, value in data.items():
+            print(key, value)
             if hasattr(self, key):
+                print("true")
                 setattr(self, key, value)
         self.save()  # Update the updated_at timestamp
