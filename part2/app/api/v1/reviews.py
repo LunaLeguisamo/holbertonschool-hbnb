@@ -10,7 +10,7 @@ api = Namespace('reviews', description='Review operations')
 review_model = api.model('Review', {
     'text': fields.String(required=True, description='Text of the review'),
     'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
-    'user_id': fields.String(required=True, description='User ID'),
+    'user_id': fields.Integer(required=True, description='ID of the user'),
     'place_id': fields.String(required=True, description='ID of the place')
 })
 
@@ -27,31 +27,29 @@ class ReviewList(Resource):
         place_data = facade.get_place(place_id)
         current_user = get_jwt_identity()
         
+        if current_user['id'] == review_data['user_id']:
         
-        list_review =  facade.get_reviews_by_place(place_id)
-        print(list_review)
-        if list_review:
-            for review in list_review:
-                if review.user_id == current_user['id']:
-                    return {'error': 'You have already reviewed this place'}, 400
-                continue
+            list_review =  facade.get_reviews_by_place(place_id)
+            print(list_review)
+            if list_review:
+                if list_review.user_id == current_user['id']:
+                    return {'error': 'You have already reviewed this place'}, 400            
+            # def get_all(self):
+            # return list(self._storage.values())
+        
+            print(current_user['id'])
+            print(place_data.owner.id)
+            if current_user['id'] != place_data.owner.id:
+                new_review = facade.create_review(review_data)
+                return {
+                    'id': new_review.id,
+                    'text': new_review.text,
+                    'rating': new_review.rating,
+                    'user_id': current_user['id'],
+                    'place_id': new_review.place_id
+                    }
             
-        # def get_all(self):
-        # return list(self._storage.values())
-    
-        print(current_user['id'])
-        print(place_data.owner.id)
-        if current_user['id'] != place_data.owner.id:
-            new_review = facade.create_review(review_data)
-            return {
-                'id': new_review.id,
-                'text': new_review.text,
-                'rating': new_review.rating,
-                'user_id': current_user['id'],
-                'place_id': new_review.place_id
-                }
-        
-        return {'error':'Cannot review your own place'}
+            return {'error':'Cannot review your own place'}, 400
         
 
     @api.response(200, 'List of reviews retrieved successfully')
