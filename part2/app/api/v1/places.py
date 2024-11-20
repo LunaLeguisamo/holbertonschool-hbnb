@@ -166,6 +166,7 @@ class PlaceResource(Resource):
 
     @api.response(200, 'Place deleted successfully')
     @api.response(404, 'Place not found')
+    @jwt_required()
     def delete(self, place_id):
         """Delete a place"""
         place = facade.get_place(place_id)

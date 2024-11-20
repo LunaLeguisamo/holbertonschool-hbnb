@@ -78,6 +78,9 @@ class HBnBFacade:
         return list_r
 
     def get_reviews_by_place(self, place_id):
+        reviews = self.get_all_reviews()
+        
+        [for review.place_id in reviews]
         list_pr = self.review_repo.get_by_attribute("place_id", place_id)
         return list_pr
 
