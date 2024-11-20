@@ -32,8 +32,9 @@ class ReviewList(Resource):
             list_review =  facade.get_reviews_by_place(place_id)
             print(list_review)
             if list_review:
-                if list_review.user_id == current_user['id']:
-                    return {'error': 'You have already reviewed this place'}, 400            
+                for review in list_review:
+                    if review.user_id == current_user['id']:
+                        return {'error': 'You have already reviewed this place'}, 400            
             # def get_all(self):
             # return list(self._storage.values())
         
