@@ -1,79 +1,60 @@
 from . import BaseModel
+from app import db
 import re
 from flask_bcrypt import Bcrypt
+from app.models.__init__ import BaseModel
+from sqlalchemy.orm import validates
 
 bcrypt = Bcrypt()
 
-class User(BaseModel):
-    user_list = []
+class User(BaseModel,db.Model):
+    __tablename__ = 'users'
     
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+     
     def __init__(self, first_name:str, last_name:str, email:str, password:str, is_admin=False):
         super().__init__()
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.is_admin = is_admin
-        self.places = []
+        # self.places = []
         # Hashes de password before storing it
         self.password = self.hash_password(password)
-        User.user_list.append(self) 
-        
-    @property
-    def first_name(self):
-        return self._first_name
+        # User.user_list.append(self)
     
-    @first_name.setter
-    def first_name(self, string):
+    @validates("first_name")
+    def validate_first_name(self, key, string):
         if isinstance(string, str) and len(string) <= 50:
-            self._first_name = string
+            return string
         else:
             raise ValueError("Name is too long")
     
-    @property
-    def last_name(self):
-        return self._last_name
-    
-    @last_name.setter
-    def last_name(self, string):
+    @validates("last_name")
+    def validate_last_name(self, key, string):
         if len(string) <= 50 and isinstance(string, str):
-            self._last_name = string
+            return string
         else:
             raise ValueError("Last name is too long")
-        
-    # @property
-    # def email(self):
-    #     return self._email
-    
-    # @email.setter
-    # def email(self, value):
-    #     if self.validar_email(value) == True:
-    #         self._email = value
-    #     else:
-    #         raise ValueError("Invalid email")
-    
-    # def validar_email(self, email):
-    #     val = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    #     if re.match(val, email):
-    #         return email
-    #     else:
-    #         raise ValueError("Invalid email")
-    
-    @property
-    def email(self):
-        return self._email
-    
-    @email.setter
-    def email(self, value):
-        if not self.validar_email(value):
+
+    @validates("email")
+    def validate_email(self, key, value):
+        if self.validar_email(value) == True:
+            return value
+        else:
             raise ValueError("Invalid email")
-        self._email = value
-        
+    
     def validar_email(self, email):
         val = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(val, email):
+        if re.match(val, email):
+            return True
+        else:
             raise ValueError("Invalid email")
-        return True
-        
+
     def add_places(self, place):
         self.places.append(place)
         place.owner = self

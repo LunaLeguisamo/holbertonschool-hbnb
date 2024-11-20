@@ -66,6 +66,7 @@ class UserList(Resource):
         
         try:
             new_user = facade.create_user(user_data)
+            print(facade.get_user())
         except ValueError as e:
             return {"error": str(e)}, 400
         return {'id': new_user.id, 'messagge': 'User successfully created'}, 201
@@ -74,6 +75,11 @@ class UserList(Resource):
     @api.response(200, 'List of users retrieved successfully')
     def get(self):
         list_users = facade.list_users()
+        # print(type(list_users))
+        
+        for user in list_users:
+            print(user.__dict__)
+        
         return [{'id': list.id, 'first_name': list.first_name, 'last_name': list.last_name, 'email': list.email}
                 for list in list_users], 200
 
