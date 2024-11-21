@@ -1,4 +1,7 @@
 from app.persistence.UserRepository import UserRepository
+from app.persistence.PlaceRepository import PlaceRepository
+from app.persistence.AmenityRepository import AmenityRepository
+from app.persistence.ReviewRepository import ReviewRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
@@ -7,6 +10,9 @@ from app.models.review import Review
 class HBnBFacade:
     def __init__(self):
         self.user_repo = UserRepository()
+        self.place_repo = PlaceRepository()
+        self.amenity_repo = AmenityRepository()
+        self.review_repo = ReviewRepository()
 
     # Placeholder method for creating a user
     def create_user(self, user_data):
