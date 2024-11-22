@@ -3,7 +3,7 @@ from app import db
 import re
 from flask_bcrypt import Bcrypt
 from app.models.__init__ import BaseModel
-from sqlalchemy.orm import validates
+from sqlalchemy.orm import validates, relationship
 
 bcrypt = Bcrypt()
 
@@ -15,6 +15,10 @@ class User(BaseModel,db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    #Relacion uno a muchos: Un User puede tener muchos Places
+    places = relationship('Place', backref='users', lazy=True)
+    #Relacion uno a muchos: Un User puede hacer muchas Reviews
+    reviews = relationship('Review', backref='users', lazy=True)
      
     def __init__(self, first_name:str, last_name:str, email:str, password:str, is_admin=False):
         super().__init__()
@@ -70,3 +74,5 @@ class User(BaseModel,db.Model):
     def verify_password(self, password):
         """Verifies if the provided password matches the hashed password."""
         return bcrypt.check_password_hash(self.password, password)
+    
+ 
