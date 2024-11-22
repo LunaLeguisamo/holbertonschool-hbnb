@@ -32,21 +32,21 @@ class User(BaseModel,db.Model):
         # User.user_list.append(self)
     
     @validates("first_name")
-    def validate_first_name(self, key, string):
+    def validate_first_name(self, string):
         if isinstance(string, str) and len(string) <= 50:
             return string
         else:
             raise ValueError("Name is too long")
     
     @validates("last_name")
-    def validate_last_name(self, key, string):
+    def validate_last_name(self, string):
         if len(string) <= 50 and isinstance(string, str):
             return string
         else:
             raise ValueError("Last name is too long")
 
     @validates("email")
-    def validate_email(self, key, value):
+    def validate_email(self, value):
         if self.validar_email(value) == True:
             return value
         else:

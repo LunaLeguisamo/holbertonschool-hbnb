@@ -1,7 +1,16 @@
 from . import BaseModel
-from app.models.user import User
+from app import db
+from sqlalchemy.orm import validates
+
 class Place(BaseModel):
-    places = []
+    __tablename__ = 'places'
+
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(128), nullable=False)
+    price = db.Column(db.Integer, nullable=False)
+    latitute = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Integer, nullable=False)
+    owner = db.Column(db.String(128), nullable=False)
     
     def __init__(self, title:str, description:str, price:float, latitude:float, longitude:float, owner, amenities=None):
         super().__init__()
@@ -10,53 +19,53 @@ class Place(BaseModel):
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
-        self.owner = owner
-        if amenities is None:
-            self.amenities = []  # List to store related amenities
-        else:
-            self.amenities = amenities
-        self.reviews = []  # List to store related reviews
+        self.owner = owner    #     if amenities is None:
+    #         self.amenities = []  # List to store related amenities
+    #     else:
+    #         self.amenities = amenities
+    #     self.reviews = []  # List to store related reviews
     
-    @property
-    def title(self):
-        return self._title
+    # @property
+    # def title(self):
+    #     return self._title
     
-    @title.setter
-    def title(self, value):
+    @validates("title")
+    def validates_title(self, value):
         if len(value) <= 100:
-            self._title = value
+            self.title = value
         else:
             raise ValueError("Title is too long")
         
-    @property
-    def price(self):
-        return self._price
+    # @property
+    # def price(self):
+    #     return self._price
     
-    @price.setter
+    @validates("title")
     def price(self, value):
         if not isinstance(value, float):
             raise ValueError("Invalid type value")
         else:
             self._price = abs(value)
     
-    @property
-    def latitude(self):
-        return self._latitude
+    # @property
+    # def latitude(self):
+    #     return self._latitude
     
-    @latitude.setter
-    def latitude(self, value):
+    @validates("latitude")
+    def validates_latitude(self, value):
         if value >= -90 and value <= 90:
-            self._latitude = value
+            self.latitude = value
         else:
             raise ValueError("Latitude is out of range")
-    @property
-    def longitude(self):
-        return self._longitude
+        
+    # @property
+    # def longitude(self):
+    #     return self._longitude
     
-    @longitude.setter
-    def longitude(self, value):
+    @validates("longitude")
+    def validates_longitude(self, value):
         if value >= -180 and value <= 180:
-            self._longitude = value
+            self.longitude = value
         else:
             raise ValueError("Longitude out of range")
         
