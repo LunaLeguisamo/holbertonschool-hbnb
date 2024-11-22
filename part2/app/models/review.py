@@ -6,12 +6,12 @@ from sqlalchemy.orm import validates
 
 
 class Review(BaseModel):
-    __table__name = 'reviews'
+    __tablename__ = 'reviews'
 
     text = db.Column(db.String(50), nullable=False)
     rating = db.Column(db.Integer, nullable=False)
-    place_id = db.Column(db.String(50), nullable=False)
-    user_id = db.Column(db.String(50), nullable = False, unique=True)
+    place_id = db.Column(db.String(50),  db.ForeignKey("places.id"),nullable=False)
+    user_id = db.Column(db.String(50), db.ForeignKey("users.id"),nullable = False, unique=True)
 
     def __init__(self, text: str, rating: int, place_id: Place, user_id: User):
         super().__init__()

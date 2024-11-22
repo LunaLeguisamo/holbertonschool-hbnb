@@ -16,9 +16,9 @@ class User(BaseModel,db.Model):
     password = db.Column(db.String(128), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     #Relacion uno a muchos: Un User puede tener muchos Places
-    places = relationship('Place', backref='users', lazy=True)
+    places = relationship('Place', backref='user')
     #Relacion uno a muchos: Un User puede hacer muchas Reviews
-    reviews = relationship('Review', backref='users', lazy=True)
+    reviews = relationship('Review', backref='user')
      
     def __init__(self, first_name:str, last_name:str, email:str, password:str, is_admin=False):
         super().__init__()
