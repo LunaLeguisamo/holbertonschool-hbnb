@@ -1,23 +1,17 @@
 from . import BaseModel
-from app import db
-from sqlalchemy.orm import validates
 
 class Amenity(BaseModel):
-    __tablename__ = 'amenities'
-
-    name = db.Column(db.String(50), nullable=False, unique=True)
-
     def __init__(self, name: str):
         super().__init__()
         self.name = name
         
-    # @property
-    # def name(self):
-    #     return self._name
+    @property
+    def name(self):
+        return self._name
     
-    @validates("name")
-    def validates_name(self, string):
+    @name.setter
+    def name(self, string):
         if len(string) <= 50:
-            self.name = string
+            return self._name == string
         else:
             raise ValueError("Name is too long")

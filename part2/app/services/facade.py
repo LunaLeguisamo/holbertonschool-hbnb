@@ -1,7 +1,4 @@
-from app.persistence.UserRepository import UserRepository
-from app.persistence.PlaceRepository import PlaceRepository
-from app.persistence.AmenityRepository import AmenityRepository
-from app.persistence.ReviewRepository import ReviewRepository
+from app.persistence.repository import InMemoryRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
@@ -9,15 +6,14 @@ from app.models.review import Review
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = UserRepository()
-        self.place_repo = PlaceRepository()
-        self.amenity_repo = AmenityRepository()
-        self.review_repo = ReviewRepository()
+        self.user_repo = InMemoryRepository()
+        self.place_repo = InMemoryRepository()
+        self.review_repo = InMemoryRepository()
+        self.amenity_repo = InMemoryRepository()
 
     # Placeholder method for creating a user
     def create_user(self, user_data):
         user = User(**user_data)
-        user.hash_password(user_data['password'])
         self.user_repo.add(user)
         return user
 
@@ -25,7 +21,7 @@ class HBnBFacade:
         return self.user_repo.get(user_id)
 
     def get_user_by_email(self, email):
-        return self.user_repo.get_user_by_email(email)
+        return self.user_repo.get_by_attribute('email', email)
     
     def list_users(self):
         list = self.user_repo.get_all()
@@ -50,7 +46,8 @@ class HBnBFacade:
         return list_a
 
     def update_amenity(self, amenity_id, amenity_data):
-        return self.amenity_repo.update(amenity_id, amenity_data)
+        update_a = self.amenity_repo.update(amenity_id, amenity_data)
+        return update_a
     
     def create_place(self, place_data):
         place = Place(**place_data)
@@ -82,15 +79,8 @@ class HBnBFacade:
         return list_r
 
     def get_reviews_by_place(self, place_id):
-        reviews = self.get_all_reviews()
-        list = []
-        for review in reviews:
-            if review.place_id == place_id:
-                list.append(review)
-        return list
-    
-        #list_pr = self.review_repo.get_by_attribute("place_id", place_id)
-        #return list_pr
+        list_pr = self.review_repo.get_by_attribute(place_id)
+        return list_pr
 
     def update_review(self, review_id, review_data):
         update_p = self.review_repo.update(review_id, review_data)
@@ -98,6 +88,3 @@ class HBnBFacade:
 
     def delete_review(self, review_id):
         self.review_repo.delete(review_id)
-        
-    def delete_place(self, place_id):
-        self.place_repo.delete(place_id)

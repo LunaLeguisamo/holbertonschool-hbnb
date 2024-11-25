@@ -1,25 +1,7 @@
 from . import BaseModel
-from app import db
-from sqlalchemy.orm import validates, relationship
-
-place_amenity = db.Table('place_amenity',
-db.Column('place_id', db.Integer, db.ForeignKey('places.id'), primary_key=True),
-db.Column('amenity_id', db.Integer, db.ForeignKey('amenities.id'), primary_key=True))
-
+from app.models.user import User
 class Place(BaseModel):
-    __tablename__ = 'places'
-
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(128), nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    latitute = db.Column(db.Float, nullable=False)
-    longitude = db.Column(db.Float, nullable=False)
-    #Relacion uno a muchos: Un Place puede tener solo un User/Owner
-    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
-    #Relacionde uno a muchos: Un Place puede tener muchas Reviews
-    reviews = relationship('Review', backref='places', lazy=True)
-    amenities = relationship('Amenity', secondary=place_amenity,
-                           backref= db.backref('places'))
+    places = []
     
     def __init__(self, title:str, description:str, price:float, latitude:float, longitude:float, owner, amenities=None):
         super().__init__()
@@ -28,53 +10,53 @@ class Place(BaseModel):
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
-        self.owner = owner    #     if amenities is None:
-    #         self.amenities = []  # List to store related amenities
-    #     else:
-    #         self.amenities = amenities
-    #     self.reviews = []  # List to store related reviews
+        self.owner = owner
+        if amenities is None:
+            self.amenities = []  # List to store related amenities
+        else:
+            self.amenities = amenities
+        self.reviews = []  # List to store related reviews
     
-    # @property
-    # def title(self):
-    #     return self._title
+    @property
+    def title(self):
+        return self._title
     
-    @validates("title")
-    def validates_title(self, value):
-        if len(value) <= 100:
-            self.title = value
+    @title.setter
+    def title(self, value):
+        if value <= 100:
+            self._title = value
         else:
             raise ValueError("Title is too long")
         
-    # @property
-    # def price(self):
-    #     return self._price
+    @property
+    def price(self):
+        return self._price
     
-    @validates("title")
+    @price.setter
     def price(self, value):
         if not isinstance(value, float):
             raise ValueError("Invalid type value")
         else:
             self._price = abs(value)
     
-    # @property
-    # def latitude(self):
-    #     return self._latitude
+    @property
+    def latitude(self):
+        return self._latitude
     
-    @validates("latitude")
-    def validates_latitude(self, value):
+    @latitude.setter
+    def latitude(self, value):
         if value >= -90 and value <= 90:
-            self.latitude = value
+            self._latitude = value
         else:
             raise ValueError("Latitude is out of range")
-        
-    # @property
-    # def longitude(self):
-    #     return self._longitude
+    @property
+    def longitude(self):
+        return self._longitude
     
-    @validates("longitude")
-    def validates_longitude(self, value):
+    @longitude.setter
+    def longitude(self, value):
         if value >= -180 and value <= 180:
-            self.longitude = value
+            self._longitude = value
         else:
             raise ValueError("Longitude out of range")
         
