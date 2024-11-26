@@ -22,7 +22,7 @@ class Review(BaseModel, db.Model):
     
     
     @validates("rating")
-    def validate_rating(self, value):
+    def validate_rating(self, key, value):
         if value >= 1 and value <= 5:
             self.rating = value
         else:

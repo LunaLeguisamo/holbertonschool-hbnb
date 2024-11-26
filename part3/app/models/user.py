@@ -27,21 +27,21 @@ class User(BaseModel, db.Model):
         self.password = self.hash_password(password)
     
     @validates("first_name")
-    def validate_first_name(self, string):
+    def validate_first_name(self, key,string):
         if isinstance(string, str) and len(string) <= 50:
             return string
         else:
             raise ValueError("Name is too long")
     
     @validates("last_name")
-    def validate_last_name(self, string):
+    def validate_last_name(self, key, string):
         if len(string) <= 50 and isinstance(string, str):
             return string
         else:
             raise ValueError("Last name is too long")
 
     @validates("email")
-    def validate_email(self, value):
+    def validate_email(self, key, value):
         if self.validar_email(value) == True:
             return value
         else:

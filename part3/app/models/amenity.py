@@ -12,7 +12,7 @@ class Amenity(BaseModel, db.Model):
         self.name = name
 
     @validates("name")
-    def validates_name(self, string):
+    def validates_name(self, key, string):
         if len(string) <= 50:
             self.name = string
         else:

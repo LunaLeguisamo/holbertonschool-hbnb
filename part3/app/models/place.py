@@ -29,28 +29,28 @@ class Place(BaseModel, db.Model):
         self.owner = owner  
     
     @validates("title")
-    def validates_title(self, value):
+    def validates_title(self, key, value):
         if len(value) <= 100:
             self.title = value
         else:
             raise ValueError("Title is too long")
     
     @validates("price")
-    def validates_price(self, value):
+    def validates_price(self, key, value):
         if not isinstance(value, float):
             raise ValueError("Invalid type value")
         else:
             self._price = abs(value)
     
     @validates("latitude")
-    def validates_latitude(self, value):
+    def validates_latitude(self, key, value):
         if value >= -90 and value <= 90:
             self.latitude = value
         else:
             raise ValueError("Latitude is out of range")
     
     @validates("longitude")
-    def validates_longitude(self, value):
+    def validates_longitude(self, key, value):
         if value >= -180 and value <= 180:
             self.longitude = value
         else:
