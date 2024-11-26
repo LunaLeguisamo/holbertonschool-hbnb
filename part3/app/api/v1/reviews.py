@@ -30,16 +30,11 @@ class ReviewList(Resource):
         if current_user['id'] == review_data['user_id']:
         
             list_review =  facade.get_reviews_by_place(place_id)
-            print(list_review)
             if list_review:
                 for review in list_review:
                     if review.user_id == current_user['id']:
-                        return {'error': 'You have already reviewed this place'}, 400            
-            # def get_all(self):
-            # return list(self._storage.values())
-        
-            print(current_user['id'])
-            print(place_data.owner.id)
+                        return {'error': 'You have already reviewed this place'}, 400
+            
             if current_user['id'] != place_data.owner.id:
                 new_review = facade.create_review(review_data)
                 return {
@@ -51,7 +46,7 @@ class ReviewList(Resource):
                     }
             
             return {'error':'Cannot review your own place'}, 400
-        return {'error':'The user_id shoueld be the same ID of the current user!'}, 400
+        return {'error':'The user_id should be the same ID of the current user!'}, 400
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
@@ -129,9 +124,7 @@ class PlaceReviewList(Resource):
     @api.response(404, 'Place not found')
     def get(self, place_id):
         """Get all reviews for a specific place"""
-        #list_pr = facade.get_reviews_by_place(place_id)
-        #return marshal(list_pr, review_model)
-        
+
         reviews = facade.get_reviews_by_place(place_id)
 
         if not reviews:

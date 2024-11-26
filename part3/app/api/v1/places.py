@@ -91,12 +91,12 @@ class PlaceList(Resource):
         except ValueError as e:
             return {"error": str(e)}, 400
         
-
+    # CHECKEAR SI FUNCIONA JEJEJ
     @api.response(200, 'List of places retrieved successfully', [place_response_model])
     def get(self):
         """Retrieve a list of all places"""
         list_places = facade.get_all_places()
-        return marshal(list_places, place_model), 200
+        return marshal(list_places, place_response_model), 200
 
 @api.route('/<place_id>')
 class PlaceResource(Resource):
@@ -111,26 +111,26 @@ class PlaceResource(Resource):
         return {
             'id': place.id,
             'title': place.title,
-                'latitude': place.latitude,
-                'longitude': place.longitude,
-                'owner': {'id': place.owner.id,
-                          'first_name': place.owner.first_name,
-                          'last_name': place.owner.last_name,
-                          'email': place.owner.email
-                          }, 
-                'amenities': [
-                    {'id': amenity.id,'name': amenity.name}
-                    for amenity in place.amenities
-                    ]
-                }, 200
+            'latitude': place.latitude,
+            'longitude': place.longitude,
+            'owner': {'id': place.owner.id,
+                    'first_name': place.owner.first_name,
+                    'last_name': place.owner.last_name,
+                    'email': place.owner.email
+                    }, 
+            'amenities': [
+                {'id': amenity.id,'name': amenity.name}
+                for amenity in place.amenities
+                ]
+            }, 200
 
     @api.expect(place_model)
     @api.response(200, 'Place updated successfully')
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
-        current_user = get_jwt_identity()
         """Update a place's information"""
+        current_user = get_jwt_identity()
         scheme = {
             'title': {'type': 'string'}, 
             'description': {'type': 'string'}, 
